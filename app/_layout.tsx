@@ -9,6 +9,7 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import { ServicesProvider } from "@/contexts/ServicesContext";
 import { RecurringClientsProvider } from "@/contexts/RecurringClientsContext";
 import { RecurringServicesProvider } from "@/contexts/RecurringServicesContext";
+import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -124,18 +125,20 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SettingsProvider>
-        <ServicesProvider>
-          <RecurringClientsProvider>
-            <RecurringServicesProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
-            </RecurringServicesProvider>
-          </RecurringClientsProvider>
-        </ServicesProvider>
-      </SettingsProvider>
-    </QueryClientProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <SettingsProvider>
+          <ServicesProvider>
+            <RecurringClientsProvider>
+              <RecurringServicesProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
+              </RecurringServicesProvider>
+            </RecurringClientsProvider>
+          </ServicesProvider>
+        </SettingsProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
