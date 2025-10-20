@@ -39,6 +39,19 @@ export default function TicketScanner({ visible, onClose, onServicesExtracted }:
   const [extractedData, setExtractedData] = useState<ExtractedTicketData[]>([]);
   const [priceInput, setPriceInput] = useState('');
   const [discountInput, setDiscountInput] = useState('');
+  const formatYYYYMMDDToDisplay = (dateStr: string): string => {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDisplayToYYYYMMDD = (dateStr: string): string => {
+    if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+      return dateStr;
+    }
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month}-${day}`;
+  };
+
   const [editableDate, setEditableDate] = useState('');
   const [editableDestination, setEditableDestination] = useState('');
   const cameraRef = useRef<CameraView>(null);
@@ -102,7 +115,7 @@ FORMATO DE RESPUESTA (IMPORTANTE: Devuelve SOLO el JSON, sin texto adicional):
 {
   "services": [
     {
-      "date": "YYYY-MM-DD",
+      "date": "DD-MM-YYYY",
       "origin": "ubicación de origen",
       "destination": "ubicación de destino",
       "company": "nombre de la empresa/cooperativa",
@@ -112,7 +125,8 @@ FORMATO DE RESPUESTA (IMPORTANTE: Devuelve SOLO el JSON, sin texto adicional):
 }
 
 INSTRUCCIONES:
-- Extrae FECHA del campo "FECHA:" del ticket
+- Extrae FECHA del campo "FECHA:" del ticket en formato DD-MM-YYYY (ejemplo: 11-10-2025)
+- Si encuentras fecha en otro formato, conviértela a DD-MM-YYYY
 - Extrae ORIGEN del campo "-RECOGIDA:" o similar
 - Extrae DESTINO del campo "-DESTINO:" o similar  
 - Extrae COMPANY del campo "-NOMBRE:" o similar
@@ -189,13 +203,15 @@ INSTRUCCIONES:
           console.log('Successfully parsed services:', parsed.services.length);
           setExtractedData(parsed.services);
           if (parsed.services[0]) {
-            setEditableDate(parsed.services[0].date || '');
+            const serviceDate = parsed.services[0].date || '';
+          setEditableDate(serviceDate.includes('-') && serviceDate.split('-')[0].length === 2 ? serviceDate : '');
             setEditableDestination(parsed.services[0].destination || '');
           }
         } else if (parsed.date) {
           console.log('Successfully parsed single service');
           setExtractedData([parsed]);
-          setEditableDate(parsed.date || '');
+          const parsedDate = parsed.date || '';
+          setEditableDate(parsedDate.includes('-') && parsedDate.split('-')[0].length === 2 ? parsedDate : '');
           setEditableDestination(parsed.destination || '');
         } else {
           throw new Error('Formato de respuesta inválido');
@@ -263,7 +279,7 @@ INSTRUCCIONES:
     }
 
     const services: Omit<Service, 'id'>[] = extractedData.map(data => ({
-      date: editableDate,
+      date: formatDisplayToYYYYMMDD(editableDate),
       origin: data.origin || '',
       destination: editableDestination,
       company: data.company || '',
@@ -415,7 +431,7 @@ INSTRUCCIONES:
                           style={[styles.dataInput, !editableDate && styles.dataInputMissing]}
                           value={editableDate}
                           onChangeText={setEditableDate}
-                          placeholder="YYYY-MM-DD"
+                          placeholder="DD-MM-YYYY"
                           placeholderTextColor="#9CA3AF"
                         />
                       </View>

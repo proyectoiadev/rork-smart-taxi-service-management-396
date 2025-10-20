@@ -46,6 +46,19 @@ export default function ScanServiceScreen() {
   const [editDestination, setEditDestination] = useState('');
   const [editCompany, setEditCompany] = useState('');
   const [editPrice, setEditPrice] = useState('');
+  const formatYYYYMMDDToDisplay = (dateStr: string): string => {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDisplayToYYYYMMDD = (dateStr: string): string => {
+    if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+      return dateStr;
+    }
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month}-${day}`;
+  };
+
   const [editDate, setEditDate] = useState('');
   const [editObservations, setEditObservations] = useState('');
   const [editDiscount, setEditDiscount] = useState('0');
@@ -97,7 +110,7 @@ Extrae EXACTAMENTE los siguientes datos del texto visible:
 2. DESTINO: La dirección o lugar de destino (puede estar después de "-DESTINO:")
 3. EMPRESA/CLIENTE: El nombre de la empresa o cliente (puede estar después de "NOMBRE:" o "-NOMBRE:")
 4. PRECIO: NO extraer, dejar vacío (el usuario lo introducirá manualmente)
-5. FECHA: La fecha del servicio en formato YYYY-MM-DD (busca "FECHA:" o similar)
+5. FECHA: La fecha del servicio en formato DD-MM-YYYY (busca "FECHA:" o similar)
 6. HORA_RECOGIDA: La hora de recogida si está disponible (busca "HORA RECOGIDA" o similar)
 7. ABN: El número ABN si está visible (busca "ABN:" o similar)
 8. OBSERVACIONES: Cualquier nota adicional relevante (busca "OBSERVACIONES:" o similar, incluye si dice "***CREDITO***" o "ABONADO")
@@ -107,7 +120,8 @@ IMPORTANTE:
 - Si dice "***CREDITO***" o "ABONADO" en observaciones, inclúyelo
 - Si no puedes encontrar algún dato, devuelve un string vacío ""
 - Para direcciones largas, copia el texto completo visible
-- La fecha debe estar en formato YYYY-MM-DD (ejemplo: 2025-10-11)
+- La fecha debe estar en formato DD-MM-YYYY (ejemplo: 11-10-2025)
+- Si encuentras fecha en otro formato, conviértela a DD-MM-YYYY
 
 Responde ÚNICAMENTE en formato JSON válido:
 {
@@ -115,7 +129,7 @@ Responde ÚNICAMENTE en formato JSON válido:
   "destination": "texto exacto del destino",
   "company": "nombre exacto de la empresa",
   "price": "",
-  "date": "YYYY-MM-DD",
+  "date": "DD-MM-YYYY",
   "observations": "texto de observaciones incluyendo CREDITO/ABONADO si aparece",
   "pickupTime": "HH:MM si está disponible",
   "abn": "número ABN si está visible"
@@ -148,7 +162,10 @@ Responde ÚNICAMENTE en formato JSON válido:
       setEditDestination(extracted.destination || '');
       setEditCompany(extracted.company || '');
       setEditPrice(extracted.price || '');
-      setEditDate(extracted.date || new Date().toISOString().split('T')[0]);
+      const defaultDate = new Date().toISOString().split('T')[0];
+      const [year, month, day] = defaultDate.split('-');
+      const defaultDateDisplay = `${day}-${month}-${year}`;
+      setEditDate(extracted.date ? (extracted.date.includes('-') && extracted.date.split('-')[0].length === 2 ? extracted.date : defaultDateDisplay) : defaultDateDisplay);
       setEditObservations(extracted.observations || '');
       setEditDiscount('0');
 
@@ -241,7 +258,7 @@ Responde ÚNICAMENTE en formato JSON válido:
 
       await addService(
         {
-          date: editDate,
+          date: formatDisplayToYYYYMMDD(editDate),
           origin: editOrigin,
           destination: editDestination,
           company: editCompany,
@@ -314,7 +331,7 @@ Responde ÚNICAMENTE en formato JSON válido:
                   style={styles.input}
                   value={editDate}
                   onChangeText={setEditDate}
-                  placeholder="YYYY-MM-DD"
+                  placeholder="DD-MM-YYYY"
                   placeholderTextColor="#9CA3AF"
                 />
               </View>

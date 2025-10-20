@@ -70,9 +70,25 @@ export default function ConfigScreen() {
   const [observations, setObservations] = useState(settings.observations);
   const [showNewCycleModal, setShowNewCycleModal] = useState(false);
   const [newCycleName, setNewCycleName] = useState('');
-  const [newCycleStartDate, setNewCycleStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const formatYYYYMMDDToDisplay = (dateStr: string): string => {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDisplayToYYYYMMDD = (dateStr: string): string => {
+    if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+      return dateStr;
+    }
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayYYYYMMDD = new Date().toISOString().split('T')[0];
+  const todayDisplay = formatYYYYMMDDToDisplay(todayYYYYMMDD);
+
+  const [newCycleStartDate, setNewCycleStartDate] = useState(todayDisplay);
   const [showCloseCycleModal, setShowCloseCycleModal] = useState(false);
-  const [closeCycleEndDate, setCloseCycleEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [closeCycleEndDate, setCloseCycleEndDate] = useState(todayDisplay);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showRenewalInfoModal, setShowRenewalInfoModal] = useState(false);
   const [showUserManual, setShowUserManual] = useState(false);
@@ -208,10 +224,12 @@ export default function ConfigScreen() {
     }
 
     try {
-      await openBillingCycle(newCycleStartDate, newCycleName.trim());
+      const dateYYYYMMDD = formatDisplayToYYYYMMDD(newCycleStartDate);
+      await openBillingCycle(dateYYYYMMDD, newCycleName.trim());
       setShowNewCycleModal(false);
       setNewCycleName('');
-      setNewCycleStartDate(new Date().toISOString().split('T')[0]);
+      const today = new Date().toISOString().split('T')[0];
+      setNewCycleStartDate(formatYYYYMMDDToDisplay(today));
       Alert.alert('Éxito', 'Ciclo de facturación abierto correctamente');
     } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'No se pudo abrir el ciclo');
@@ -226,9 +244,11 @@ export default function ConfigScreen() {
     }
 
     try {
-      await closeBillingCycle(activeCycle.id, closeCycleEndDate);
+      const dateYYYYMMDD = formatDisplayToYYYYMMDD(closeCycleEndDate);
+      await closeBillingCycle(activeCycle.id, dateYYYYMMDD);
       setShowCloseCycleModal(false);
-      setCloseCycleEndDate(new Date().toISOString().split('T')[0]);
+      const today = new Date().toISOString().split('T')[0];
+      setCloseCycleEndDate(formatYYYYMMDDToDisplay(today));
       Alert.alert('Éxito', 'Ciclo de facturación cerrado correctamente');
     } catch {
       Alert.alert('Error', 'No se pudo cerrar el ciclo');
@@ -984,7 +1004,7 @@ export default function ConfigScreen() {
                 style={styles.modalInput}
                 value={newCycleStartDate}
                 onChangeText={setNewCycleStartDate}
-                placeholder="YYYY-MM-DD"
+                placeholder="DD-MM-YYYY"
                 placeholderTextColor="#9CA3AF"
               />
               <Text style={styles.modalNote}>
@@ -1029,7 +1049,7 @@ export default function ConfigScreen() {
                 style={styles.modalInput}
                 value={closeCycleEndDate}
                 onChangeText={setCloseCycleEndDate}
-                placeholder="YYYY-MM-DD"
+                placeholder="DD-MM-YYYY"
                 placeholderTextColor="#9CA3AF"
               />
               <Text style={styles.modalNote}>

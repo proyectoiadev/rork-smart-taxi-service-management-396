@@ -45,6 +45,19 @@ export default function HomeScreen() {
   const [price, setPrice] = useState('');
   const [discountPercent, setDiscountPercent] = useState('0');
   const [observations, setObservations] = useState('');
+  const formatYYYYMMDDToDisplay = (dateStr: string): string => {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDisplayToYYYYMMDD = (dateStr: string): string => {
+    if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+      return dateStr;
+    }
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month}-${day}`;
+  };
+
   const [serviceDate, setServiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Tarjeta');
   const [clientName, setClientName] = useState('');
@@ -412,18 +425,7 @@ export default function HomeScreen() {
     return { daysInMonth, startingDayOfWeek, year, month };
   };
 
-  const formatDateToDDMMYYYY = (dateStr: string): string => {
-    const [year, month, day] = dateStr.split('-');
-    return `${day}-${month}-${year}`;
-  };
 
-  const formatDateFromDDMMYYYY = (dateStr: string): string => {
-    if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
-      return dateStr;
-    }
-    const [day, month, year] = dateStr.split('-');
-    return `${year}-${month}-${day}`;
-  };
 
   const handleDateSelect = (day: number, isEdit: boolean = false, isViewFilter: boolean = false) => {
     const month = isViewFilter ? viewCalendarMonth : (isEdit ? editCalendarMonth : calendarMonth);
@@ -655,7 +657,7 @@ export default function HomeScreen() {
                 >
                   <Calendar size={18} color="#6B7280" style={styles.calendarIcon} />
                   <Text style={styles.dateInputText}>
-                    {formatDateToDDMMYYYY(serviceDate)}
+                    {formatYYYYMMDDToDisplay(serviceDate)}
                   </Text>
                 </TouchableOpacity>
                 {showDatePicker && renderCalendar(false)}
@@ -885,8 +887,8 @@ export default function HomeScreen() {
               <Calendar size={18} color="#4CAF50" />
               <Text style={styles.dateFilterButtonText}>
                 {selectedViewDate 
-                  ? formatDateToDDMMYYYY(selectedViewDate)
-                  : formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]) + ' (Hoy)'
+                  ? formatYYYYMMDDToDisplay(selectedViewDate)
+                  : formatYYYYMMDDToDisplay(new Date().toISOString().split('T')[0]) + ' (Hoy)'
                 }
               </Text>
             </TouchableOpacity>
@@ -1035,7 +1037,7 @@ export default function HomeScreen() {
                   >
                     <Calendar size={18} color="#6B7280" style={styles.calendarIcon} />
                     <Text style={styles.dateInputText}>
-                      {formatDateToDDMMYYYY(editDate)}
+                      {formatYYYYMMDDToDisplay(editDate)}
                     </Text>
                   </TouchableOpacity>
                   {showEditDatePicker && renderCalendar(true)}
