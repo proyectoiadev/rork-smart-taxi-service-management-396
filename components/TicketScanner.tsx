@@ -130,7 +130,7 @@ INSTRUCCIONES:
 - Extrae ORIGEN del campo "-RECOGIDA:" o similar
 - Extrae DESTINO del campo "-DESTINO:" o similar  
 - Extrae COMPANY del campo "-NOMBRE:" o similar
-- IMPORTANTE: NO extraigas el precio, el usuario lo ingresará manualmente
+- IMPORTANTE: NO extraigas el precio NI el descuento, el usuario los ingresará manualmente
 - Extrae observaciones relevantes del ticket (si las hay)
 - Si no encuentras un campo, usa cadena vacía ""
 - Si hay múltiples servicios, añádelos al array "services"

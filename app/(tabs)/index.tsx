@@ -77,24 +77,7 @@ export default function HomeScreen() {
     }
   }, [clientName, paymentMethod]);
 
-  useEffect(() => {
-    if (paymentMethod === 'Abonado' && clientName && origin && destination) {
-      const preference = getCompanyRoutePreference(clientName, origin, destination);
-      if (preference) {
-        if (!price || price === '0') {
-          setPrice(preference.price);
-        }
-        if (discountPercent === '0') {
-          setDiscountPercent(preference.discountPercent);
-        }
-      } else {
-        const routePrice = getRoutePrice(origin, destination);
-        if (routePrice && (!price || price === '0')) {
-          setPrice(routePrice);
-        }
-      }
-    }
-  }, [clientName, origin, destination, paymentMethod]);
+
 
   
   const [editingService, setEditingService] = useState<Service | null>(null);
