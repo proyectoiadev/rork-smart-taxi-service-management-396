@@ -38,15 +38,15 @@ function CycleSummary({ selectedCycle, getServicesByCycle }: { selectedCycle: Bi
       </View>
       <View style={styles.summaryRow}>
         <Text style={styles.summaryLabel}>Ingresos Brutos:</Text>
-        <Text style={styles.summaryValue}>{Math.round(totals.totalPrice * 100) / 100}{' '}€</Text>
+        <Text style={styles.summaryValue}>{totals.totalPrice.toFixed(2)}{' '}€</Text>
       </View>
       <View style={styles.summaryRow}>
         <Text style={styles.summaryLabel}>Descuentos:</Text>
-        <Text style={[styles.summaryValue, styles.discount]}>-{Math.round(totals.totalDiscount * 100) / 100}{' '}€</Text>
+        <Text style={[styles.summaryValue, styles.discount]}>-{totals.totalDiscount.toFixed(2)}{' '}€</Text>
       </View>
       <View style={[styles.summaryRow, styles.summaryRowFinal]}>
         <Text style={styles.summaryLabelFinal}>Total Neto:</Text>
-        <Text style={styles.summaryValueFinal}>{Math.round(totals.totalFinal * 100) / 100}{' '}€</Text>
+        <Text style={styles.summaryValueFinal}>{totals.totalFinal.toFixed(2)}{' '}€</Text>
       </View>
     </View>
   );
@@ -113,7 +113,7 @@ export default function GenerateHTMLScreen() {
           <td style="color: #374151; padding-left: 4px;">${service.company}</td>
           <td style="text-align: right; color: #374151; white-space: nowrap;">${service.price}&nbsp;€</td>
           <td style="text-align: right; color: ${discountPercent > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountPercent > 0 ? `-${service.discountPercent}%` : '-'}</td>
-          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${Math.round(finalPrice * 100) / 100}&nbsp;€</td>
+          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalPrice.toFixed(2)}&nbsp;€</td>
         </tr>
         ${service.observations ? `
         <tr>
@@ -489,15 +489,15 @@ export default function GenerateHTMLScreen() {
       </div>
       <div class="summary-item">
         <span class="summary-label">Ingresos Brutos:</span>
-        <span class="summary-value">${Math.round(abonadoTotals.totalPrice * 100) / 100}&nbsp;€</span>
+        <span class="summary-value">${abonadoTotals.totalPrice.toFixed(2)}&nbsp;€</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Descuentos:</span>
-        <span class="summary-value discount">-${Math.round(abonadoTotals.totalDiscount * 100) / 100}&nbsp;€</span>
+        <span class="summary-value discount">-${abonadoTotals.totalDiscount.toFixed(2)}&nbsp;€</span>
       </div>
       <div class="summary-total">
         <span class="summary-label">Total Neto:</span>
-        <span class="summary-value">${Math.round(abonadoTotals.totalFinal * 100) / 100}&nbsp;€</span>
+        <span class="summary-value">${abonadoTotals.totalFinal.toFixed(2)}&nbsp;€</span>
       </div>
     </div>
     

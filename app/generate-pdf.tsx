@@ -105,17 +105,17 @@ export default function GeneratePDFScreen() {
             <View style={styles.pdfSummary}>
               <View style={styles.pdfSummaryRow}>
                 <Text style={styles.pdfSummaryLabel}>Total Bruto</Text>
-                <Text style={styles.pdfSummaryValue}>{Math.round(totals.totalPrice * 100) / 100} €</Text>
+                <Text style={styles.pdfSummaryValue}>{totals.totalPrice.toFixed(2)} €</Text>
               </View>
               <View style={styles.pdfSummaryRow}>
                 <Text style={styles.pdfSummaryLabel}>Descuentos</Text>
                 <Text style={[styles.pdfSummaryValue, styles.pdfDiscount]}>
-                  -{Math.round(totals.totalDiscount * 100) / 100} €
+                  -{totals.totalDiscount.toFixed(2)} €
                 </Text>
               </View>
               <View style={[styles.pdfSummaryRow, styles.pdfSummaryRowFinal]}>
                 <Text style={styles.pdfSummaryLabelFinal}>Total a Cobrar</Text>
-                <Text style={styles.pdfSummaryValueFinal}>{Math.round(totals.totalFinal * 100) / 100} €</Text>
+                <Text style={styles.pdfSummaryValueFinal}>{totals.totalFinal.toFixed(2)} €</Text>
               </View>
             </View>
 
@@ -159,7 +159,7 @@ export default function GeneratePDFScreen() {
                         {discountPercent > 0 ? `-${service.discountPercent}%` : '-'}
                       </Text>
                       <Text style={[styles.pdfTableCell, { width: 85, textAlign: 'right' as const, fontWeight: '700' as const, color: '#4CAF50' }]}>
-                        {Math.round(finalPrice * 100) / 100}€
+                        {finalPrice.toFixed(2)}€
                       </Text>
                     </View>
                   );
