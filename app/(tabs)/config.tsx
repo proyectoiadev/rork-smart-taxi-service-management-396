@@ -570,7 +570,7 @@ export default function ConfigScreen() {
               
               {subscriptionInfo.type === 'trial' && (
                 <View style={styles.subscriptionNote}>
-                  <Text style={styles.subscriptionNoteText}>💡 Después del período de prueba de 10 días, necesitarás renovar tu suscripción por 90 días (29.99€ por trimestre).</Text>
+                  <Text style={styles.subscriptionNoteText}>💡 Después del período de prueba de 10 días, necesitarás renovar tu suscripción por 90 días (39.99€ por trimestre).</Text>
                 </View>
               )}
             </View>
