@@ -1,5 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Alert, Platform, Share } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  ScrollView, 
+  Modal, 
+  Alert, 
+  Platform, 
+  Share,
+  ActivityIndicator,
+  GestureResponderEvent
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Download, Calendar, Globe } from 'lucide-react-native';
@@ -19,10 +31,56 @@ export default function ReportsScreen() {
   const router = useRouter();
   const { settings } = useSettings();
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // ✅ Formato de fecha para visualización
+  const formatDateForDisplay = useCallback((dateStr: string): string => {
+    try {
+      if (!dateStr) return '';
+      
+      // Si está en formato YYYY-MM-DD
+      if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+      }
+      
+      // Si está en formato DDMMYYYY
+      if (dateStr.length === 8) {
+        return `${dateStr.slice(0, 2)}/${dateStr.slice(2, 4)}/${dateStr.slice(4)}`;
+      }
+      
+      return dateStr;
+    } catch {
+      return dateStr;
+    }
+  }, []);
+
+  const handleGenerateReport = useCallback(async (month: number) => {
+    setShowMonthPicker(false);
+    setIsLoading(true);
+    
+    try {
+      await generateMonthReport(month, settings, formatDateForDisplay);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      Alert.alert('Error', 'No se pudo generar el reporte');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [settings, formatDateForDisplay]);
 
   return (
     <View style={styles.container}>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#4CAF50" />
+            <Text style={styles.loadingText}>Generando reporte...</Text>
+          </View>
+        </View>
+      )}
+
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={styles.headerTitle}>Reportes</Text>
         <Text style={styles.headerSubtitle}>Exporta y genera documentos</Text>
@@ -32,6 +90,9 @@ export default function ReportsScreen() {
         <TouchableOpacity
           style={styles.card}
           onPress={() => router.push('/export-csv')}
+          accessibilityRole="button"
+          accessibilityLabel="Exportar servicios en formato CSV"
+          disabled={isLoading}
         >
           <View style={styles.cardIcon}>
             <Download size={32} color="#4CAF50" />
@@ -47,6 +108,9 @@ export default function ReportsScreen() {
         <TouchableOpacity
           style={styles.card}
           onPress={() => router.push('/generate-html')}
+          accessibilityRole="button"
+          accessibilityLabel="Generar reporte en formato HTML"
+          disabled={isLoading}
         >
           <View style={styles.cardIcon}>
             <Globe size={32} color="#4CAF50" />
@@ -62,6 +126,9 @@ export default function ReportsScreen() {
         <TouchableOpacity
           style={styles.card}
           onPress={() => setShowMonthPicker(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Ver reportes de meses anteriores"
+          disabled={isLoading}
         >
           <View style={styles.cardIcon}>
             <Calendar size={32} color="#4CAF50" />
@@ -77,15 +144,7 @@ export default function ReportsScreen() {
         <MonthPickerModal
           visible={showMonthPicker}
           onClose={() => setShowMonthPicker(false)}
-          onSelectMonth={async (month) => {
-            setShowMonthPicker(false);
-            try {
-              await generateMonthReport(month, settings);
-            } catch (error) {
-              console.error('Error generating report:', error);
-              Alert.alert('Error', 'No se pudo generar el reporte');
-            }
-          }}
+          onSelectMonth={handleGenerateReport}
         />
       </ScrollView>
     </View>
@@ -97,6 +156,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  loadingContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '600',
+  },
   header: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
@@ -106,7 +188,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: 'bold', // ✅ Sin "as const"
     color: '#111827',
     marginBottom: 4,
   },
@@ -148,7 +230,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: '600', // ✅ Sin "as const"
     color: '#111827',
     marginBottom: 4,
   },
@@ -172,7 +254,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '700' as const,
+    fontWeight: 'bold', // ✅ Sin "as const"
     color: '#111827',
     marginBottom: 16,
     textAlign: 'center',
@@ -192,7 +274,7 @@ const styles = StyleSheet.create({
   },
   monthButtonText: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: '600', // ✅ Sin "as const"
     color: '#6B7280',
   },
   modalCloseButton: {
@@ -204,7 +286,7 @@ const styles = StyleSheet.create({
   modalCloseButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: '600', // ✅ Sin "as const"
   },
 });
 
@@ -215,6 +297,12 @@ interface MonthPickerModalProps {
 }
 
 function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalProps) {
+  // ✅ Tipo apropiado para el evento
+  const handleOverlayPress = (e: GestureResponderEvent) => {
+    e.stopPropagation();
+    onClose();
+  };
+
   return (
     <Modal
       visible={visible}
@@ -225,9 +313,9 @@ function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalP
       <TouchableOpacity 
         style={styles.modalOverlay}
         activeOpacity={1}
-        onPress={onClose}
+        onPress={handleOverlayPress}
       >
-        <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+        <View onStartShouldSetResponder={() => true}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Selecciona un Mes</Text>
             <View style={styles.monthGrid}>
@@ -236,16 +324,23 @@ function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalP
                   key={index}
                   style={styles.monthButton}
                   onPress={() => onSelectMonth(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Seleccionar ${month}`}
                 >
                   <Text style={styles.monthButtonText}>{month}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
+            <TouchableOpacity 
+              style={styles.modalCloseButton} 
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Cancelar selección"
+            >
               <Text style={styles.modalCloseButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
-        </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     </Modal>
   );
@@ -253,34 +348,42 @@ function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalP
 
 const LOGO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/vtxu3dykdqnfq7dlmew6n';
 
-async function generateMonthReport(month: number, settings: any) {
+// ✅ Función optimizada con mejor manejo de errores
+async function generateMonthReport(
+  month: number, 
+  settings: any,
+  formatDateForDisplay: (date: string) => string
+) {
   const CURRENT_YEAR = new Date().getFullYear();
   const key = `taxi_services_${CURRENT_YEAR}_${month}`;
   
   try {
     const stored = await AsyncStorage.getItem(key);
+    
     if (!stored) {
       Alert.alert('Sin datos', `No hay servicios registrados para ${MONTH_NAMES[month]}`);
       return;
     }
 
     const services = JSON.parse(stored);
-    if (services.length === 0) {
+    
+    if (!Array.isArray(services) || services.length === 0) {
       Alert.alert('Sin datos', `No hay servicios registrados para ${MONTH_NAMES[month]}`);
       return;
     }
 
-    const totalsCalc = services.reduce((acc: any, service: any) => {
+    // ✅ Cálculo optimizado de totales
+    const totalsCalc = services.reduce((acc, service) => {
       const priceCents = textToCents(service.price) || 0;
       const discountNum = textPercentToNumber(service.discountPercent) || 0;
       const discountCents = Math.floor((priceCents * discountNum) / 100);
       const finalCents = priceCents - discountCents;
       
-      acc.totalPrice += priceCents;
-      acc.totalDiscount += discountCents;
-      acc.totalFinal += finalCents;
-      
-      return acc;
+      return {
+        totalPrice: acc.totalPrice + priceCents,
+        totalDiscount: acc.totalDiscount + discountCents,
+        totalFinal: acc.totalFinal + finalCents,
+      };
     }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
 
     const totals = {
@@ -289,7 +392,15 @@ async function generateMonthReport(month: number, settings: any) {
       totalFinal: centsToCurrency(totalsCalc.totalFinal),
     };
 
-    const htmlContent = generateHTMLContent(services, month, CURRENT_YEAR, settings, totals);
+    const htmlContent = generateHTMLContent(
+      services, 
+      month, 
+      CURRENT_YEAR, 
+      settings, 
+      totals,
+      formatDateForDisplay
+    );
+    
     const fileName = `reporte_${MONTH_NAMES[month]}_${CURRENT_YEAR}.html`;
 
     if (Platform.OS === 'web') {
@@ -311,58 +422,69 @@ async function generateMonthReport(month: number, settings: any) {
 
       await Share.share({
         url: fileUri,
-        title: fileName,
-        message: `Reporte de ${MONTH_NAMES[month]} ${CURRENT_YEAR}`,
+        title: `Reporte ${MONTH_NAMES[month]} ${CURRENT_YEAR}`,
       });
+
+      Alert.alert('Éxito', 'Reporte generado y compartido correctamente');
     }
   } catch (error) {
-    console.error('Error generating report:', error);
+    console.error('Error in generateMonthReport:', error);
     throw error;
   }
 }
 
-function generateHTMLContent(services: any[], month: number, year: number, settings: any, totals: any): string {
-  const currentDate = new Date();
-  const generatedDate = currentDate.toLocaleDateString('es-ES', { 
-    day: '2-digit', 
-    month: '2-digit', 
+// ✅ Función mejorada para generar HTML con formato de fecha correcto
+function generateHTMLContent(
+  services: any[], 
+  month: number, 
+  year: number, 
+  settings: any, 
+  totals: any,
+  formatDateForDisplay: (date: string) => string
+) {
+  const generatedDate = new Date().toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
   });
 
-  const servicesRows = services.map((service: any, index: number) => {
-    const priceCents = textToCents(service.price) || 0;
-    const discountNum = textPercentToNumber(service.discountPercent) || 0;
-    const discountCents = Math.floor((priceCents * discountNum) / 100);
-    const finalCents = priceCents - discountCents;
-    const priceDisplay = centsToCurrency(priceCents);
-    const finalDisplay = centsToCurrency(finalCents);
+  // ✅ Generar filas con formato de fecha correcto
+  const servicesRows = services
+    .map((service, index) => {
+      const priceCents = textToCents(service.price) || 0;
+      const discountNum = textPercentToNumber(service.discountPercent) || 0;
+      const discountCents = Math.floor((priceCents * discountNum) / 100);
+      const finalCents = priceCents - discountCents;
 
-    return `
-      <tr>
-        <td style="color: #6b7280;">${index + 1}</td>
-        <td style="color: #6b7280;">${service.date.split('-').reverse().join('-')}</td>
-        <td style="color: #374151;">${service.origin} → ${service.destination}</td>
-        <td style="color: #374151; padding-left: 4px;">${service.clientName || service.company || '-'}</td>
-        <td style="text-align: right; color: #374151; white-space: nowrap;">${priceDisplay}</td>
-        <td style="text-align: right; color: ${discountNum > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountNum > 0 ? `-${service.discountPercent}%` : '-'}</td>
-        <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalDisplay}</td>
-      </tr>
-      ${service.observations ? `
-      <tr>
-        <td colspan="7" style="padding: 5px 6px 7px 6px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 9px; font-style: italic;">Obs: ${service.observations}</td>
-      </tr>
-      ` : ''}
-    `;
-  }).join('');
+      const route = service.origin && service.destination 
+        ? `${service.origin} → ${service.destination}` 
+        : '-';
+      
+      const company = service.company || service.clientName || '-';
+      
+      // ✅ Formato de fecha correcto
+      const formattedDate = formatDateForDisplay(service.date);
+
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${formattedDate}</td>
+          <td>${route}</td>
+          <td style="padding-left: 4px;">${company}</td>
+          <td class="right">${centsToCurrency(priceCents)}</td>
+          <td class="right">${discountNum}%</td>
+          <td class="right">${centsToCurrency(finalCents)}</td>
+        </tr>
+      `;
+    })
+    .join('');
 
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reporte de ${MONTH_NAMES[month]} ${year}</title>
+  <title>Reporte ${MONTH_NAMES[month]} ${year}</title>
   <style>
     * {
       margin: 0;
@@ -370,25 +492,18 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
       box-sizing: border-box;
     }
     
-    @page {
-      size: A4;
-      margin: 15mm 20mm;
-    }
-    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: #ffffff;
-      color: #1f2937;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #2d3748;
       line-height: 1.4;
-      font-size: 10pt;
+      background: white;
     }
     
     .container {
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
+      max-width: 210mm;
+      margin: 0 auto;
       background: white;
-      padding: 0;
+      padding: 12mm 15mm;
     }
     
     .header {
@@ -403,20 +518,22 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
     .logo-section {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     
     .logo {
       width: 50px;
       height: 50px;
-      object-fit: contain;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid #e5e7eb;
     }
     
     .company-info h1 {
-      font-size: 15px;
+      font-size: 16px;
       color: #2d3748;
       margin-bottom: 3px;
-      font-weight: 700;
+      fontWeight: bold;
     }
     
     .company-info p {
@@ -432,7 +549,7 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
       color: #4caf50;
       font-size: 18px;
       margin-bottom: 4px;
-      font-weight: 700;
+      fontWeight: bold;
     }
     
     .report-title p {
@@ -477,7 +594,7 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
     
     .section-title {
       font-size: 13px;
-      font-weight: 700;
+      font-weight: bold;
       color: #2d3748;
       margin-bottom: 10px;
       padding-bottom: 6px;
@@ -499,7 +616,7 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
       padding: 8px 6px;
       text-align: left;
       font-size: 9px;
-      font-weight: 700;
+      font-weight: bold;
       color: #374151;
       text-transform: uppercase;
       border-bottom: 1px solid #d1d5db;
@@ -515,6 +632,10 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
       padding: 7px 6px;
       border-bottom: 1px solid #e5e7eb;
       font-size: 10px;
+    }
+    
+    td.right {
+      text-align: right;
     }
     
     tr:last-child td {
@@ -550,7 +671,7 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
     
     .summary-value {
       font-size: 13px;
-      font-weight: 700;
+      font-weight: bold;
       color: #1f2937;
     }
     
@@ -656,7 +777,7 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
       <div class="logo-section">
         <img src="${LOGO_URL}" alt="Logo" class="logo" />
         <div class="company-info">
-          <h1>${settings.cooperativeName}</h1>
+          <h1>${settings.cooperativeName || 'Servicio de Taxi'}</h1>
           <p>${settings.vehicleId || 'N/A'}</p>
         </div>
       </div>
