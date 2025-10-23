@@ -227,7 +227,7 @@ function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalP
         activeOpacity={1}
         onPress={onClose}
       >
-        <View onTouchStart={(e: any) => e.stopPropagation()}>
+        <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Selecciona un Mes</Text>
             <View style={styles.monthGrid}>
@@ -245,7 +245,7 @@ function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalP
               <Text style={styles.modalCloseButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
   );
