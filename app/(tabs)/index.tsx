@@ -12,6 +12,7 @@ import {
   Platform,
   Modal,
   Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Trash2, Plus, Edit2, Calendar, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ScanLine } from 'lucide-react-native';
@@ -568,18 +569,20 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <KeyboardAvoidingView 
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-      >
-        <ScrollView 
-          style={styles.mainScrollView}
-          contentContainerStyle={styles.mainScrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={true}
-          scrollEnabled={true}
-        >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.keyboardAvoid}>
+          <KeyboardAvoidingView 
+            style={styles.flex}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          >
+            <ScrollView 
+              style={styles.mainScrollView}
+              contentContainerStyle={styles.mainScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={true}
+              scrollEnabled={true}
+            >
           <View style={styles.addServiceCard}>
             <TouchableOpacity 
               style={styles.addServiceHeader}
@@ -792,6 +795,9 @@ export default function HomeScreen() {
                         multiline
                         numberOfLines={3}
                         textAlignVertical="top"
+                        returnKeyType="done"
+                        blurOnSubmit={true}
+                        onSubmitEditing={() => Keyboard.dismiss()}
                       />
                       <View style={styles.voiceButtonContainerTop}>
                         <VoiceButton onResult={setObservations} />
@@ -955,8 +961,10 @@ export default function HomeScreen() {
               );
             })
           )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </TouchableWithoutFeedback>
 
       <Modal
         visible={showEditModal}
@@ -1097,6 +1105,9 @@ export default function HomeScreen() {
                           multiline
                           numberOfLines={3}
                           textAlignVertical="top"
+                          returnKeyType="done"
+                          blurOnSubmit={true}
+                          onSubmitEditing={() => Keyboard.dismiss()}
                         />
                         <View style={styles.voiceButtonContainerTop}>
                           <VoiceButton onResult={setEditObservations} />
@@ -1189,6 +1200,9 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
+  flex: {
+    flex: 1,
+  },
   header: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
@@ -1278,7 +1292,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainScrollContent: {
-    paddingBottom: 400,
+    paddingBottom: Platform.OS === 'ios' ? 500 : 400,
   },
   addServiceCard: {
     backgroundColor: '#FFFFFF',

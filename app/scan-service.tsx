@@ -9,6 +9,8 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Upload, Camera, Check, X, Loader2 } from 'lucide-react-native';
@@ -316,11 +318,18 @@ Responde ÚNICAMENTE en formato JSON válido:
           <Text style={styles.processingSubtext}>Extrayendo datos del documento</Text>
         </View>
       ) : isConfirming && extractedData ? (
-        <KeyboardAvoidingView
-          style={styles.flex}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <ScrollView style={styles.flex} contentContainerStyle={styles.confirmContainer}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.flex}>
+            <KeyboardAvoidingView
+              style={styles.flex}
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={0}
+            >
+              <ScrollView 
+                style={styles.flex} 
+                contentContainerStyle={styles.confirmContainer}
+                keyboardShouldPersistTaps="handled"
+              >
             <View style={styles.confirmCard}>
               <Text style={styles.confirmTitle}>Datos Extraídos</Text>
               <Text style={styles.confirmSubtitle}>Revisa y edita los datos antes de guardar</Text>
@@ -406,6 +415,9 @@ Responde ÚNICAMENTE en formato JSON válido:
                   multiline
                   numberOfLines={3}
                   textAlignVertical="top"
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                  onSubmitEditing={() => Keyboard.dismiss()}
                 />
               </View>
 
@@ -421,8 +433,10 @@ Responde ÚNICAMENTE en formato JSON válido:
                 </TouchableOpacity>
               </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+              </ScrollView>
+            </KeyboardAvoidingView>
+          </View>
+        </TouchableWithoutFeedback>
       ) : (
         <ScrollView style={styles.flex} contentContainerStyle={styles.content}>
           <View style={styles.infoCard}>
@@ -586,6 +600,7 @@ const styles = StyleSheet.create({
   },
   confirmContainer: {
     padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 500 : 20,
   },
   confirmCard: {
     backgroundColor: '#FFFFFF',
