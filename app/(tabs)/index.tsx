@@ -942,7 +942,7 @@ export default function HomeScreen() {
                   </View>
                   <Text style={styles.serviceCardDescription}>
                     {service.origin || service.destination
-                      ? `${service.origin}${service.origin && service.destination ? ' → ' : ''}${service.destination}`
+                      ? `${service.origin || ''}${service.origin && service.destination ? ' → ' : ''}${service.destination || ''}`
                       : 'Sin ruta especificada'}
                   </Text>
                   <Text style={styles.serviceCardCompany}>{service.company}</Text>
