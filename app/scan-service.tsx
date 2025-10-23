@@ -385,7 +385,7 @@ Responde ÚNICAMENTE en formato JSON válido:
                     style={styles.input}
                     value={editPrice}
                     onChangeText={setEditPrice}
-                    placeholder="0.00"
+                    placeholder="0,00"
                     placeholderTextColor="#9CA3AF"
                     keyboardType="decimal-pad"
                   />

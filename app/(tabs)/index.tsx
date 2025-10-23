@@ -827,7 +827,7 @@ export default function HomeScreen() {
                       style={styles.priceInput}
                       value={price}
                       onChangeText={setPrice}
-                      placeholder="0.00"
+                      placeholder="0,00"
                       placeholderTextColor="#9CA3AF"
                       keyboardType="decimal-pad"
                       returnKeyType="done"
@@ -1137,7 +1137,7 @@ export default function HomeScreen() {
                         style={styles.modalInput}
                         value={editPrice}
                         onChangeText={setEditPrice}
-                        placeholder="0.00"
+                        placeholder="0,00"
                         placeholderTextColor="#9CA3AF"
                         keyboardType="decimal-pad"
                         returnKeyType="done"
