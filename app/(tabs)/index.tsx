@@ -894,7 +894,7 @@ export default function HomeScreen() {
               <Text style={styles.dateFilterButtonText}>
                 {selectedViewDate 
                   ? formatYYYYMMDDToDisplay(selectedViewDate)
-                  : formatYYYYMMDDToDisplay(new Date().toISOString().split('T')[0]) + ' (Hoy)'
+                  : `${formatYYYYMMDDToDisplay(new Date().toISOString().split('T')[0])} (Hoy)`
                 }
               </Text>
             </TouchableOpacity>
