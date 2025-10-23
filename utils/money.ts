@@ -85,7 +85,7 @@ export function discountCentsHalfUp(cents: number, percentText: string | null | 
 
   // Camino preferente con BigInt (si está disponible)
   if (typeof BigInt === 'function') {
-    const numer = BigInt(Math.floor(cents)) * BigInt(bps);
+    const numer = BigInt(cents | 0) * BigInt(bps);
     const adj = numer >= 0n ? 5000n : -5000n;
     return Number((numer + adj) / 10000n);
   }
