@@ -22,7 +22,7 @@ import { useRecurringClients } from '@/contexts/RecurringClientsContext';
 import { useRecurringServices } from '@/contexts/RecurringServicesContext';
 import VoiceInput, { VoiceButton } from '@/components/VoiceInput';
 import { formatCurrency, calculateDiscount, calculateFinalPrice } from '@/constants/formatters';
-import { textToCents, centsToCurrency, textPercentToNumber } from '@/utils/money';
+import { textToCents, centsToCurrency, centsToDotString, textPercentToNumber } from '@/utils/money';
 import TicketScanner from '@/components/TicketScanner';
 
 const MONTH_NAMES = [
@@ -143,6 +143,18 @@ export default function HomeScreen() {
       }
     }
 
+    const priceCents = textToCents(price);
+    const discountNum = textPercentToNumber(discountPercent ?? '0') ?? 0;
+    if (priceCents == null || priceCents <= 0) {
+      Alert.alert('Error', 'Precio inválido. Usa formato 12,34 o 12.34');
+      return;
+    }
+    if (discountNum < 0 || discountNum > 100) {
+      Alert.alert('Error', 'Descuento inválido (0-100)');
+      return;
+    }
+    const normalizedPriceText = centsToDotString(priceCents);
+
     try {
       console.log('Starting service creation...');
       
@@ -194,8 +206,8 @@ export default function HomeScreen() {
         origin: paymentMethod === 'Abonado' ? origin : '',
         destination: paymentMethod === 'Abonado' ? destination : '',
         company: paymentMethod === 'Abonado' ? clientName : '',
-        price,
-        discountPercent: paymentMethod === 'Abonado' ? discountPercent : '0',
+        price: normalizedPriceText,
+        discountPercent: paymentMethod === 'Abonado' ? String(discountNum) : '0',
         observations: paymentMethod === 'Abonado' ? observations : '',
         paymentMethod,
         clientName: paymentMethod === 'Abonado' ? clientName : undefined,
