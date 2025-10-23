@@ -377,26 +377,26 @@ export default function HomeScreen() {
   const abonadoServices = filteredServices.filter(s => s.paymentMethod === 'Abonado');
 
   const todayTotal = useMemo(() => {
-    const todayServices = services.filter(s => s.date === new Date().toISOString().split('T')[0]);
-    const totalCents = todayServices.reduce((acc, service) => {
-      const priceCents = textToCents(service.price) || 0;
-      const discountNum = textPercentToNumber(service.discountPercent) || 0;
-      const discountCents = Math.floor((priceCents * discountNum) / 100);
-      const finalCents = priceCents - discountCents;
-      return acc + finalCents;
-    }, 0);
-    return centsToCurrency(totalCents);
+    const today = new Date().toISOString().split('T')[0];
+    const cents = services
+      .filter(s => s.date === today)
+      .reduce((acc, s) => {
+        const p = textToCents(String(s.price ?? '')) ?? 0;
+        const d = textPercentToNumber(String(s.discountPercent ?? '0')) ?? 0;
+        const disc = Math.round(p * d / 100);
+        return acc + (p - disc);
+      }, 0);
+    return centsToCurrency(cents);
   }, [services]);
 
   const monthTotal = useMemo(() => {
-    const totalCents = services.reduce((acc, service) => {
-      const priceCents = textToCents(service.price) || 0;
-      const discountNum = textPercentToNumber(service.discountPercent) || 0;
-      const discountCents = Math.floor((priceCents * discountNum) / 100);
-      const finalCents = priceCents - discountCents;
-      return acc + finalCents;
+    const cents = services.reduce((acc, s) => {
+      const p = textToCents(String(s.price ?? '')) ?? 0;
+      const d = textPercentToNumber(String(s.discountPercent ?? '0')) ?? 0;
+      const disc = Math.round(p * d / 100);
+      return acc + (p - disc);
     }, 0);
-    return centsToCurrency(totalCents);
+    return centsToCurrency(cents);
   }, [services]);
 
   const getVisibleMonths = () => {
