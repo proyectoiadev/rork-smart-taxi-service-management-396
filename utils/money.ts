@@ -25,7 +25,9 @@ export function textToCents(input: string): number | null {
 
 /** 1234 -> "12,34 €" */
 export function centsToCurrency(cents: number): string {
-  return EUR.format((cents || 0) / 100);
+  const euros = (cents || 0) / 100;
+  const formatted = euros.toFixed(2).replace('.', ',');
+  return `${formatted} €`;
 }
 
 /** 1234 -> "12.34" (punto) para guardar en texto compatible con parseFloat */
