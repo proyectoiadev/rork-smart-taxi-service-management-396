@@ -713,7 +713,11 @@ export default function ConfigScreen() {
                       <View style={styles.closedCycleInfo}>
                         <Text style={styles.closedCycleName}>{cycle.name}</Text>
                         <View style={styles.closedCycleDates}>
-                          <Text style={styles.closedCycleDate}>{new Date(cycle.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })} - {cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : 'N/A'}</Text>
+                          <Text style={styles.closedCycleDate}>
+                            {new Date(cycle.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                            {' - '}
+                            {cycle.endDate ? new Date(cycle.endDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : 'N/A'}
+                          </Text>
                         </View>
                       </View>
                       <View style={styles.closedCycleActions}>
