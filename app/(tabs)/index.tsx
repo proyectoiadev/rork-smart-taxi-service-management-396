@@ -20,6 +20,7 @@ import { useServices, Service, PaymentMethod } from '@/contexts/ServicesContext'
 import { useRecurringClients } from '@/contexts/RecurringClientsContext';
 import { useRecurringServices } from '@/contexts/RecurringServicesContext';
 import VoiceInput, { VoiceButton } from '@/components/VoiceInput';
+import { formatCurrency, calculateDiscount, calculateFinalPrice } from '@/constants/formatters';
 import TicketScanner from '@/components/TicketScanner';
 
 const MONTH_NAMES = [
@@ -530,12 +531,12 @@ export default function HomeScreen() {
         <View style={styles.totalsContainer}>
           <View style={styles.totalCard}>
             <Text style={styles.totalCardLabel}>Total Día</Text>
-            <Text style={styles.totalCardValue}>€{todayTotal.toFixed(2)}</Text>
+            <Text style={styles.totalCardValue}>€{todayTotal}</Text>
           </View>
           
           <View style={styles.totalCard}>
             <Text style={styles.totalCardLabel}>Total Mes</Text>
-            <Text style={styles.totalCardValue}>€{monthTotal.toFixed(2)}</Text>
+            <Text style={styles.totalCardValue}>€{monthTotal}</Text>
           </View>
         </View>
       </View>
@@ -900,8 +901,8 @@ export default function HomeScreen() {
             filteredServices.map((service) => {
               const price = parseFloat(service.price) || 0;
               const discountPercent = parseFloat(service.discountPercent) || 0;
-              const discountAmount = (price * discountPercent) / 100;
-              const finalPrice = price - discountAmount;
+              const discountAmount = calculateDiscount(service.price, service.discountPercent);
+              const finalPrice = calculateFinalPrice(service.price, service.discountPercent);
 
               return (
                 <View key={service.id} style={styles.serviceCard}>
@@ -938,12 +939,12 @@ export default function HomeScreen() {
 
                   <View style={styles.serviceCardFooter}>
                     <View>
-                      <Text style={styles.serviceCardPrice}>Precio: €{price.toFixed(2)}</Text>
+                      <Text style={styles.serviceCardPrice}>Precio: €{formatCurrency(service.price)}</Text>
                       {discountAmount > 0 && (
-                        <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
+                        <Text style={styles.serviceCardDiscount}>-{formatCurrency(service.discountPercent)}%</Text>
                       )}
                     </View>
-                    <Text style={styles.serviceCardTotal}>Total: €{finalPrice.toFixed(2)}</Text>
+                    <Text style={styles.serviceCardTotal}>Total: €{finalPrice}</Text>
                   </View>
                 </View>
               );

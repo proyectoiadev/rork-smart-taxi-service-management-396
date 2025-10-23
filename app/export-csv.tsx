@@ -44,8 +44,8 @@ export default function ExportCSVScreen() {
           `"${service.company}"`,
           service.price,
           service.discountPercent,
-          discountAmount.toFixed(2),
-          finalPrice.toFixed(2),
+          discountAmount,
+          finalPrice,
           `"${service.observations.replace(/"/g, '""')}"`,
         ].join(',');
         
