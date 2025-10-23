@@ -7,13 +7,28 @@ export function formatCurrency(value: string | number): string {
   if (typeof value === 'string') {
     const parsed = parseFloat(value);
     if (isNaN(parsed)) {
-      return '0';
+      return '0.00';
     }
-    return value;
+    // Si es un string válido, asegurarse de que tenga formato correcto
+    const numValue = parseFloat(value);
+    const str = numValue.toString();
+    const decimalIndex = str.indexOf('.');
+    
+    if (decimalIndex === -1) {
+      return str + '.00';
+    }
+    
+    // Truncar a 2 decimales
+    const truncated = str.substring(0, decimalIndex + 3);
+    const parts = truncated.split('.');
+    if (parts[1] && parts[1].length === 1) {
+      return truncated + '0';
+    }
+    return truncated;
   }
   
   if (isNaN(value)) {
-    return '0';
+    return '0.00';
   }
   
   // Para números (resultados de cálculos), truncamos a 2 decimales sin redondear
@@ -21,11 +36,16 @@ export function formatCurrency(value: string | number): string {
   const decimalIndex = str.indexOf('.');
   
   if (decimalIndex === -1) {
-    return str;
+    return str + '.00';
   }
   
   // Truncar a 2 decimales sin redondear
-  return str.substring(0, decimalIndex + 3);
+  const truncated = str.substring(0, decimalIndex + 3);
+  const parts = truncated.split('.');
+  if (parts[1] && parts[1].length === 1) {
+    return truncated + '0';
+  }
+  return truncated;
 }
 
 /**
@@ -51,7 +71,7 @@ export function calculateFinalPrice(price: string | number, discountPercent: str
   const discountNum = typeof discountPercent === 'string' ? parseFloat(discountPercent) : discountPercent;
   
   if (isNaN(priceNum) || isNaN(discountNum)) {
-    return '0';
+    return '0.00';
   }
   
   const discountAmount = (priceNum * discountNum) / 100;
@@ -62,8 +82,13 @@ export function calculateFinalPrice(price: string | number, discountPercent: str
   const decimalIndex = str.indexOf('.');
   
   if (decimalIndex === -1) {
-    return str;
+    return str + '.00';
   }
   
-  return str.substring(0, decimalIndex + 3);
+  const truncated = str.substring(0, decimalIndex + 3);
+  const parts = truncated.split('.');
+  if (parts[1] && parts[1].length === 1) {
+    return truncated + '0';
+  }
+  return truncated;
 }
