@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 
@@ -134,7 +134,7 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     await saveBillingCycles(updatedCycles);
   }, [billingCycles]);
 
-  return useMemo(() => ({
+  return {
     settings,
     updateSettings,
     isLoading,
@@ -144,5 +144,5 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     getActiveCycle,
     deleteBillingCycle,
     loadSettings,
-  }), [settings, updateSettings, isLoading, billingCycles, openBillingCycle, closeBillingCycle, getActiveCycle, deleteBillingCycle, loadSettings]);
+  };
 });

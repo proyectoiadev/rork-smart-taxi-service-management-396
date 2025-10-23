@@ -101,11 +101,11 @@ export const [RecurringClientsProvider, useRecurringClients] = createContextHook
     });
   }, [clients]);
 
-  return useMemo(() => ({
+  return {
     clients: sortedClients,
     isLoading,
     addOrUpdateClient,
     deleteClient,
     getClientByName,
-  }), [sortedClients, isLoading, addOrUpdateClient, deleteClient, getClientByName]);
+  };
 });
