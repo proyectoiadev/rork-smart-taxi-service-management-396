@@ -967,7 +967,7 @@ export default function HomeScreen() {
                       <Text style={styles.serviceCardPrice}>Precio: {priceDisplay}</Text>
                       {discC > 0 && (
                         <Text style={styles.serviceCardDiscount}>
-                          <Text>{`-${String(service.discountPercent ?? '0').replace('.', ',')}%`}</Text>
+                          {`-${String(service.discountPercent ?? '0').replace('.', ',')}%`}
                         </Text>
                       )}
                     </View>
