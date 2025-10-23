@@ -52,9 +52,36 @@ export const [RecurringServicesProvider, useRecurringServices] = createContextHo
         AsyncStorage.getItem(COMPANY_ROUTE_PREFERENCES_KEY),
       ]);
 
-      if (routesData) setRoutes(JSON.parse(routesData));
-      if (discountsData) setCompanyDiscounts(JSON.parse(discountsData));
-      if (preferencesData) setCompanyRoutePreferences(JSON.parse(preferencesData));
+      if (routesData) {
+        try {
+          const parsed = JSON.parse(routesData);
+          setRoutes(Array.isArray(parsed) ? parsed : []);
+        } catch (e) {
+          console.error('Error parsing routes JSON:', e);
+          await AsyncStorage.removeItem(RECURRING_ROUTES_KEY);
+          setRoutes([]);
+        }
+      }
+      if (discountsData) {
+        try {
+          const parsed = JSON.parse(discountsData);
+          setCompanyDiscounts(Array.isArray(parsed) ? parsed : []);
+        } catch (e) {
+          console.error('Error parsing discounts JSON:', e);
+          await AsyncStorage.removeItem(COMPANY_DISCOUNTS_KEY);
+          setCompanyDiscounts([]);
+        }
+      }
+      if (preferencesData) {
+        try {
+          const parsed = JSON.parse(preferencesData);
+          setCompanyRoutePreferences(Array.isArray(parsed) ? parsed : []);
+        } catch (e) {
+          console.error('Error parsing preferences JSON:', e);
+          await AsyncStorage.removeItem(COMPANY_ROUTE_PREFERENCES_KEY);
+          setCompanyRoutePreferences([]);
+        }
+      }
     } catch (error) {
       console.error('Error loading recurring services data:', error);
     } finally {

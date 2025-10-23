@@ -40,7 +40,15 @@ export const [ServicesProvider, useServices] = createContextHook(() => {
       const key = getStorageKey(CURRENT_YEAR, month);
       const stored = await AsyncStorage.getItem(key);
       if (stored) {
-        setServices(JSON.parse(stored));
+        try {
+          const parsed = JSON.parse(stored);
+          setServices(Array.isArray(parsed) ? parsed : []);
+        } catch (parseError) {
+          console.error('Error parsing services JSON:', parseError);
+          console.log('Clearing corrupted data for key:', key);
+          await AsyncStorage.removeItem(key);
+          setServices([]);
+        }
       } else {
         setServices([]);
       }
@@ -111,7 +119,12 @@ export const [ServicesProvider, useServices] = createContextHook(() => {
     
     const verifyKey = getStorageKey(CURRENT_YEAR, currentMonth);
     const verifyStored = await AsyncStorage.getItem(verifyKey);
-    console.log('Verification - stored services count:', verifyStored ? JSON.parse(verifyStored).length : 0);
+    try {
+      const parsed = verifyStored ? JSON.parse(verifyStored) : [];
+      console.log('Verification - stored services count:', Array.isArray(parsed) ? parsed.length : 0);
+    } catch (e) {
+      console.log('Verification - could not parse stored data');
+    }
   }, [services, currentMonth, saveServices]);
 
   const updateService = useCallback(async (id: number, updatedData: Partial<Omit<Service, 'id'>>) => {
@@ -133,8 +146,14 @@ export const [ServicesProvider, useServices] = createContextHook(() => {
         const key = getStorageKey(CURRENT_YEAR, month);
         const stored = await AsyncStorage.getItem(key);
         if (stored) {
-          const monthServices: Service[] = JSON.parse(stored);
-          allServices.push(...monthServices);
+          try {
+            const monthServices: Service[] = JSON.parse(stored);
+            if (Array.isArray(monthServices)) {
+              allServices.push(...monthServices);
+            }
+          } catch (parseError) {
+            console.error(`Error parsing JSON for month ${month}:`, parseError);
+          }
         }
       } catch (error) {
         console.error(`Error loading services for month ${month}:`, error);

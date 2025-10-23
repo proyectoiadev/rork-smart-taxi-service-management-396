@@ -24,7 +24,15 @@ export const [RecurringClientsProvider, useRecurringClients] = createContextHook
     try {
       const stored = await AsyncStorage.getItem(RECURRING_CLIENTS_KEY);
       if (stored) {
-        setClients(JSON.parse(stored));
+        try {
+          const parsed = JSON.parse(stored);
+          setClients(Array.isArray(parsed) ? parsed : []);
+        } catch (parseError) {
+          console.error('Error parsing recurring clients JSON:', parseError);
+          console.log('Clearing corrupted data');
+          await AsyncStorage.removeItem(RECURRING_CLIENTS_KEY);
+          setClients([]);
+        }
       }
     } catch (error) {
       console.error('Error loading recurring clients:', error);

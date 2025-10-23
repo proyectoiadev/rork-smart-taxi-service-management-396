@@ -37,7 +37,15 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     try {
       const stored = await AsyncStorage.getItem(SETTINGS_KEY);
       if (stored) {
-        setSettings(JSON.parse(stored));
+        try {
+          const parsed = JSON.parse(stored);
+          setSettings(parsed);
+        } catch (parseError) {
+          console.error('Error parsing settings JSON:', parseError);
+          console.log('Using default settings');
+          await AsyncStorage.removeItem(SETTINGS_KEY);
+          setSettings(DEFAULT_SETTINGS);
+        }
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -55,7 +63,15 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     try {
       const stored = await AsyncStorage.getItem(BILLING_CYCLES_KEY);
       if (stored) {
-        setBillingCycles(JSON.parse(stored));
+        try {
+          const parsed = JSON.parse(stored);
+          setBillingCycles(Array.isArray(parsed) ? parsed : []);
+        } catch (parseError) {
+          console.error('Error parsing billing cycles JSON:', parseError);
+          console.log('Clearing corrupted billing cycles data');
+          await AsyncStorage.removeItem(BILLING_CYCLES_KEY);
+          setBillingCycles([]);
+        }
       }
     } catch (error) {
       console.error('Error loading billing cycles:', error);
