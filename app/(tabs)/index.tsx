@@ -935,7 +935,7 @@ export default function HomeScreen() {
 
                   <View style={styles.serviceCardFooter}>
                     <View>
-                      <Text style={styles.serviceCardPrice}>Precio: €{service.price}</Text>
+                      <Text style={styles.serviceCardPrice}>Precio: €{price.toFixed(2)}</Text>
                       {discountAmount > 0 && (
                         <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
                       )}
