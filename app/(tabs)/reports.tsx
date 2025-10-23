@@ -222,25 +222,34 @@ function MonthPickerModal({ visible, onClose, onSelectMonth }: MonthPickerModalP
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Selecciona un Mes</Text>
-          <View style={styles.monthGrid}>
-            {MONTH_NAMES.map((month, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.monthButton}
-                onPress={() => onSelectMonth(index)}
-              >
-                <Text style={styles.monthButtonText}>{month}</Text>
-              </TouchableOpacity>
-            ))}
+      <TouchableOpacity 
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <TouchableOpacity 
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Selecciona un Mes</Text>
+            <View style={styles.monthGrid}>
+              {MONTH_NAMES.map((month, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.monthButton}
+                  onPress={() => onSelectMonth(index)}
+                >
+                  <Text style={styles.monthButtonText}>{month}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
+              <Text style={styles.modalCloseButtonText}>Cancelar</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
-            <Text style={styles.modalCloseButtonText}>Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 }
