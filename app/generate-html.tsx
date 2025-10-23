@@ -38,15 +38,15 @@ function CycleSummary({ selectedCycle, getServicesByCycle }: { selectedCycle: Bi
       </View>
       <View style={styles.summaryRow}>
         <Text style={styles.summaryLabel}>Ingresos Brutos:</Text>
-        <Text style={styles.summaryValue}>{totals.totalPrice.toFixed(2)}{' '}€</Text>
+        <Text style={styles.summaryValue}>{totals.totalPrice.toFixed(2)} €</Text>
       </View>
       <View style={styles.summaryRow}>
         <Text style={styles.summaryLabel}>Descuentos:</Text>
-        <Text style={[styles.summaryValue, styles.discount]}>-{totals.totalDiscount.toFixed(2)}{' '}€</Text>
+        <Text style={[styles.summaryValue, styles.discount]}>-{totals.totalDiscount.toFixed(2)} €</Text>
       </View>
       <View style={[styles.summaryRow, styles.summaryRowFinal]}>
         <Text style={styles.summaryLabelFinal}>Total Neto:</Text>
-        <Text style={styles.summaryValueFinal}>{totals.totalFinal.toFixed(2)}{' '}€</Text>
+        <Text style={styles.summaryValueFinal}>{totals.totalFinal.toFixed(2)} €</Text>
       </View>
     </View>
   );
