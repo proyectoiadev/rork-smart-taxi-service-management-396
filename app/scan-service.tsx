@@ -387,7 +387,7 @@ Responde ÚNICAMENTE en formato JSON válido:
                     onChangeText={setEditPrice}
                     placeholder="0.00"
                     placeholderTextColor="#9CA3AF"
-                    keyboardType="numeric"
+                    keyboardType="decimal-pad"
                   />
                 </View>
 
@@ -399,7 +399,7 @@ Responde ÚNICAMENTE en formato JSON válido:
                     onChangeText={setEditDiscount}
                     placeholder="0"
                     placeholderTextColor="#9CA3AF"
-                    keyboardType="numeric"
+                    keyboardType="decimal-pad"
                   />
                 </View>
               </View>

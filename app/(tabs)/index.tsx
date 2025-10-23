@@ -817,7 +817,7 @@ export default function HomeScreen() {
                       onChangeText={setPrice}
                       placeholder="0.00"
                       placeholderTextColor="#9CA3AF"
-                      keyboardType="numeric"
+                      keyboardType="decimal-pad"
                       returnKeyType="done"
                       onSubmitEditing={() => Keyboard.dismiss()}
                     />
@@ -837,7 +837,7 @@ export default function HomeScreen() {
                         onChangeText={setDiscountPercent}
                         placeholder="0"
                         placeholderTextColor="#9CA3AF"
-                        keyboardType="numeric"
+                        keyboardType="decimal-pad"
                         returnKeyType="done"
                         onSubmitEditing={() => Keyboard.dismiss()}
                       />
@@ -1127,7 +1127,7 @@ export default function HomeScreen() {
                         onChangeText={setEditPrice}
                         placeholder="0.00"
                         placeholderTextColor="#9CA3AF"
-                        keyboardType="numeric"
+                        keyboardType="decimal-pad"
                         returnKeyType="done"
                         onSubmitEditing={() => Keyboard.dismiss()}
                       />
@@ -1147,7 +1147,7 @@ export default function HomeScreen() {
                           onChangeText={setEditDiscountPercent}
                           placeholder="0"
                           placeholderTextColor="#9CA3AF"
-                          keyboardType="numeric"
+                          keyboardType="decimal-pad"
                           returnKeyType="done"
                           onSubmitEditing={() => Keyboard.dismiss()}
                         />

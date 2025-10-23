@@ -475,7 +475,7 @@ INSTRUCCIONES:
                         onChangeText={setPriceInput}
                         placeholder="Ej: 55"
                         placeholderTextColor="#9CA3AF"
-                        keyboardType="numeric"
+                        keyboardType="decimal-pad"
                       />
                     </View>
 
@@ -487,7 +487,7 @@ INSTRUCCIONES:
                         onChangeText={setDiscountInput}
                         placeholder="Ej: 0"
                         placeholderTextColor="#9CA3AF"
-                        keyboardType="numeric"
+                        keyboardType="decimal-pad"
                       />
                     </View>
                   </View>
