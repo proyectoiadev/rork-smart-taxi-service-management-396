@@ -533,12 +533,12 @@ export default function HomeScreen() {
         <View style={styles.totalsContainer}>
           <View style={styles.totalCard}>
             <Text style={styles.totalCardLabel}>Total Día</Text>
-            <Text style={styles.totalCardValue}>€{todayTotal}</Text>
+            <Text style={styles.totalCardValue}>{todayTotal} €</Text>
           </View>
           
           <View style={styles.totalCard}>
             <Text style={styles.totalCardLabel}>Total Mes</Text>
-            <Text style={styles.totalCardValue}>€{monthTotal}</Text>
+            <Text style={styles.totalCardValue}>{monthTotal} €</Text>
           </View>
         </View>
       </View>
