@@ -5,10 +5,10 @@ export const EUR = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 2,
 });
 
-export function textToCents(input: string): number | null {
-  if (input == null) return null;
+export function textToCents(input: string | null | undefined): number | null {
+  if (input == null || input === undefined) return null;
   const t = String(input).trim();
-  if (!t) return null;
+  if (!t || t === 'null' || t === 'undefined') return null;
 
   const cleaned = t.replace(/\s|\u00A0/g, '').replace(/\.(?=\d{3}(\D|$))/g, '');
   const unified = cleaned.replace(',', '.');
@@ -35,10 +35,10 @@ export function centsToDotString(cents: number): string {
   return `${neg}${euros}.${dec}`;
 }
 
-export function percentTextToBps(input: string): number | null {
-  if (input == null) return null;
+export function percentTextToBps(input: string | null | undefined): number | null {
+  if (input == null || input === undefined) return null;
   const u = String(input).trim().replace(',', '.');
-  if (!/^-?\d*\.?\d*$/.test(u) || u === '' || u === '.' || u === '-.' || u === '-') return null;
+  if (!/^-?\d*\.?\d*$/.test(u) || u === '' || u === '.' || u === '-.' || u === '-' || u === 'null' || u === 'undefined') return null;
 
   const neg = u[0] === '-' ? -1 : 1;
   const [ip = '0', dpRaw = ''] = (neg === -1 ? u.slice(1) : u).split('.');
@@ -49,9 +49,10 @@ export function percentTextToBps(input: string): number | null {
   return neg * (intPart * 100 + decPart);
 }
 
-export function discountCentsHalfUp(cents: number, percentText: string): number {
+export function discountCentsHalfUp(cents: number, percentText: string | null | undefined): number {
+  if (cents == null || isNaN(cents)) return 0;
   const bps = percentTextToBps(percentText) ?? 0;
-  const numer = BigInt(cents) * BigInt(bps);
+  const numer = BigInt(Math.floor(cents)) * BigInt(bps);
   const adj = numer >= 0n ? 5000n : -5000n;
   const q = (numer + adj) / 10000n;
   return Number(q);
