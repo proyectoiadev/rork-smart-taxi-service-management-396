@@ -21,6 +21,7 @@ import { useRecurringClients } from '@/contexts/RecurringClientsContext';
 import { useRecurringServices } from '@/contexts/RecurringServicesContext';
 import VoiceInput, { VoiceButton } from '@/components/VoiceInput';
 import { formatCurrency, calculateDiscount, calculateFinalPrice } from '@/constants/formatters';
+import { textToCents, centsToCurrency, textPercentToNumber } from '@/utils/money';
 import TicketScanner from '@/components/TicketScanner';
 
 const MONTH_NAMES = [
@@ -364,25 +365,25 @@ export default function HomeScreen() {
 
   const todayTotal = useMemo(() => {
     const todayServices = services.filter(s => s.date === new Date().toISOString().split('T')[0]);
-    const total = todayServices.reduce((acc, service) => {
-      const price = parseFloat(service.price) || 0;
-      const discountPercent = parseFloat(service.discountPercent) || 0;
-      const discountAmount = (price * discountPercent) / 100;
-      const finalPrice = price - discountAmount;
-      return acc + finalPrice;
+    const totalCents = todayServices.reduce((acc, service) => {
+      const priceCents = textToCents(service.price) || 0;
+      const discountNum = textPercentToNumber(service.discountPercent) || 0;
+      const discountCents = Math.floor((priceCents * discountNum) / 100);
+      const finalCents = priceCents - discountCents;
+      return acc + finalCents;
     }, 0);
-    return formatCurrency(total);
+    return centsToCurrency(totalCents);
   }, [services]);
 
   const monthTotal = useMemo(() => {
-    const total = services.reduce((acc, service) => {
-      const price = parseFloat(service.price) || 0;
-      const discountPercent = parseFloat(service.discountPercent) || 0;
-      const discountAmount = (price * discountPercent) / 100;
-      const finalPrice = price - discountAmount;
-      return acc + finalPrice;
+    const totalCents = services.reduce((acc, service) => {
+      const priceCents = textToCents(service.price) || 0;
+      const discountNum = textPercentToNumber(service.discountPercent) || 0;
+      const discountCents = Math.floor((priceCents * discountNum) / 100);
+      const finalCents = priceCents - discountCents;
+      return acc + finalCents;
     }, 0);
-    return formatCurrency(total);
+    return centsToCurrency(totalCents);
   }, [services]);
 
   const getVisibleMonths = () => {
@@ -533,12 +534,12 @@ export default function HomeScreen() {
         <View style={styles.totalsContainer}>
           <View style={styles.totalCard}>
             <Text style={styles.totalCardLabel}>Total Día</Text>
-            <Text style={styles.totalCardValue}>{todayTotal} €</Text>
+            <Text style={styles.totalCardValue}>{todayTotal}</Text>
           </View>
           
           <View style={styles.totalCard}>
             <Text style={styles.totalCardLabel}>Total Mes</Text>
-            <Text style={styles.totalCardValue}>{monthTotal} €</Text>
+            <Text style={styles.totalCardValue}>{monthTotal}</Text>
           </View>
         </View>
       </View>
@@ -901,10 +902,12 @@ export default function HomeScreen() {
             </View>
           ) : (
             filteredServices.map((service) => {
-              const price = parseFloat(service.price) || 0;
-              const discountPercent = parseFloat(service.discountPercent) || 0;
-              const discountAmount = calculateDiscount(service.price, service.discountPercent);
-              const finalPrice = calculateFinalPrice(service.price, service.discountPercent);
+              const priceCents = textToCents(service.price) || 0;
+              const discountNum = textPercentToNumber(service.discountPercent) || 0;
+              const discountCents = Math.floor((priceCents * discountNum) / 100);
+              const finalCents = priceCents - discountCents;
+              const priceDisplay = centsToCurrency(priceCents);
+              const finalDisplay = centsToCurrency(finalCents);
 
               return (
                 <View key={service.id} style={styles.serviceCard}>
@@ -941,12 +944,12 @@ export default function HomeScreen() {
 
                   <View style={styles.serviceCardFooter}>
                     <View>
-                      <Text style={styles.serviceCardPrice}>Precio: €{service.price}</Text>
-                      {discountAmount > 0 && (
+                      <Text style={styles.serviceCardPrice}>Precio: {priceDisplay}</Text>
+                      {discountCents > 0 && (
                         <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
                       )}
                     </View>
-                    <Text style={styles.serviceCardTotal}>Total: €{finalPrice}</Text>
+                    <Text style={styles.serviceCardTotal}>Total: {finalDisplay}</Text>
                   </View>
                 </View>
               );

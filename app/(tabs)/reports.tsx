@@ -7,6 +7,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import { formatCurrency } from '@/constants/formatters';
+import { textToCents, centsToCurrency, textPercentToNumber } from '@/utils/money';
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -264,22 +265,22 @@ async function generateMonthReport(month: number, settings: any) {
     }
 
     const totalsCalc = services.reduce((acc: any, service: any) => {
-      const price = parseFloat(service.price) || 0;
-      const discountPercent = parseFloat(service.discountPercent) || 0;
-      const discountAmount = (price * discountPercent) / 100;
-      const finalPrice = price - discountAmount;
+      const priceCents = textToCents(service.price) || 0;
+      const discountNum = textPercentToNumber(service.discountPercent) || 0;
+      const discountCents = Math.floor((priceCents * discountNum) / 100);
+      const finalCents = priceCents - discountCents;
       
-      acc.totalPrice += price;
-      acc.totalDiscount += discountAmount;
-      acc.totalFinal += finalPrice;
+      acc.totalPrice += priceCents;
+      acc.totalDiscount += discountCents;
+      acc.totalFinal += finalCents;
       
       return acc;
     }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
 
     const totals = {
-      totalPrice: formatCurrency(totalsCalc.totalPrice),
-      totalDiscount: formatCurrency(totalsCalc.totalDiscount),
-      totalFinal: formatCurrency(totalsCalc.totalFinal),
+      totalPrice: centsToCurrency(totalsCalc.totalPrice),
+      totalDiscount: centsToCurrency(totalsCalc.totalDiscount),
+      totalFinal: centsToCurrency(totalsCalc.totalFinal),
     };
 
     const htmlContent = generateHTMLContent(services, month, CURRENT_YEAR, settings, totals);
@@ -325,10 +326,12 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
   });
 
   const servicesRows = services.map((service: any, index: number) => {
-    const price = parseFloat(service.price) || 0;
-    const discountPercent = parseFloat(service.discountPercent) || 0;
-    const discountAmount = (price * discountPercent) / 100;
-    const finalPrice = price - discountAmount;
+    const priceCents = textToCents(service.price) || 0;
+    const discountNum = textPercentToNumber(service.discountPercent) || 0;
+    const discountCents = Math.floor((priceCents * discountNum) / 100);
+    const finalCents = priceCents - discountCents;
+    const priceDisplay = centsToCurrency(priceCents);
+    const finalDisplay = centsToCurrency(finalCents);
 
     return `
       <tr>
@@ -336,9 +339,9 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
         <td style="color: #6b7280;">${service.date.split('-').reverse().join('-')}</td>
         <td style="color: #374151;">${service.origin} → ${service.destination}</td>
         <td style="color: #374151; padding-left: 4px;">${service.clientName || service.company || '-'}</td>
-        <td style="text-align: right; color: #374151; white-space: nowrap;">${service.price}&nbsp;€</td>
-        <td style="text-align: right; color: ${discountPercent > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountPercent > 0 ? `-${service.discountPercent}%` : '-'}</td>
-        <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${formatCurrency(finalPrice)}&nbsp;€</td>
+        <td style="text-align: right; color: #374151; white-space: nowrap;">${priceDisplay}</td>
+        <td style="text-align: right; color: ${discountNum > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountNum > 0 ? `-${service.discountPercent}%` : '-'}</td>
+        <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalDisplay}</td>
       </tr>
       ${service.observations ? `
       <tr>
@@ -699,15 +702,15 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
       </div>
       <div class="summary-item">
         <span class="summary-label">Ingresos Brutos:</span>
-        <span class="summary-value">${totals.totalPrice} €</span>
+        <span class="summary-value">${totals.totalPrice}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Descuentos:</span>
-        <span class="summary-value discount">-${totals.totalDiscount} €</span>
+        <span class="summary-value discount">-${totals.totalDiscount}</span>
       </div>
       <div class="summary-total">
         <span class="summary-label">Total Neto:</span>
-        <span class="summary-value">${totals.totalFinal} €</span>
+        <span class="summary-value">${totals.totalFinal}</span>
       </div>
     </div>
     

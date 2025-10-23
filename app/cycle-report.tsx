@@ -7,6 +7,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import * as FileSystem from 'expo-file-system';
 import { Share2 } from 'lucide-react-native';
 import { formatCurrency } from '@/constants/formatters';
+import { textToCents, centsToCurrency, textPercentToNumber } from '@/utils/money';
 
 const LOGO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/vtxu3dykdqnfq7dlmew6n';
 
@@ -29,22 +30,22 @@ export default function CycleReportScreen() {
       setCycleServices(filtered);
 
       const calculatedTotalsCalc = filtered.reduce((acc, service) => {
-        const price = parseFloat(service.price) || 0;
-        const discountPercent = parseFloat(service.discountPercent) || 0;
-        const discountAmount = (price * discountPercent) / 100;
-        const finalPrice = price - discountAmount;
+        const priceCents = textToCents(service.price) || 0;
+        const discountNum = textPercentToNumber(service.discountPercent) || 0;
+        const discountCents = Math.floor((priceCents * discountNum) / 100);
+        const finalCents = priceCents - discountCents;
         
-        acc.totalPrice += price;
-        acc.totalDiscount += discountAmount;
-        acc.totalFinal += finalPrice;
+        acc.totalPrice += priceCents;
+        acc.totalDiscount += discountCents;
+        acc.totalFinal += finalCents;
         
         return acc;
       }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
 
       const calculatedTotals = {
-        totalPrice: formatCurrency(calculatedTotalsCalc.totalPrice),
-        totalDiscount: formatCurrency(calculatedTotalsCalc.totalDiscount),
-        totalFinal: formatCurrency(calculatedTotalsCalc.totalFinal),
+        totalPrice: centsToCurrency(calculatedTotalsCalc.totalPrice),
+        totalDiscount: centsToCurrency(calculatedTotalsCalc.totalDiscount),
+        totalFinal: centsToCurrency(calculatedTotalsCalc.totalFinal),
       };
 
       setTotals(calculatedTotals);
@@ -70,10 +71,12 @@ export default function CycleReportScreen() {
     });
 
     const servicesRows = cycleServices.map((service, index) => {
-      const price = parseFloat(service.price) || 0;
-      const discountPercent = parseFloat(service.discountPercent) || 0;
-      const discountAmount = (price * discountPercent) / 100;
-      const finalPrice = price - discountAmount;
+      const priceCents = textToCents(service.price) || 0;
+      const discountNum = textPercentToNumber(service.discountPercent) || 0;
+      const discountCents = Math.floor((priceCents * discountNum) / 100);
+      const finalCents = priceCents - discountCents;
+      const priceDisplay = centsToCurrency(priceCents);
+      const finalDisplay = centsToCurrency(finalCents);
       
       return `
         <tr>
@@ -81,9 +84,9 @@ export default function CycleReportScreen() {
           <td style="color: #6b7280;">${service.date.split('-').reverse().join('-')}</td>
           <td style="color: #374151;">${service.origin} → ${service.destination}</td>
           <td style="color: #374151; padding-left: 4px;">${service.clientName || '-'}</td>
-          <td style="text-align: right; color: #374151; white-space: nowrap;">${service.price}&nbsp;€</td>
-          <td style="text-align: right; color: ${discountPercent > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountPercent > 0 ? `-${service.discountPercent}%` : '-'}</td>
-          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${formatCurrency(finalPrice)}&nbsp;€</td>
+          <td style="text-align: right; color: #374151; white-space: nowrap;">${priceDisplay}</td>
+          <td style="text-align: right; color: ${discountNum > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountNum > 0 ? `-${service.discountPercent}%` : '-'}</td>
+          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalDisplay}</td>
         </tr>
         ${service.observations ? `
         <tr>
@@ -447,15 +450,15 @@ export default function CycleReportScreen() {
       </div>
       <div class="summary-item">
         <span class="summary-label">Ingresos Brutos:</span>
-        <span class="summary-value">${totals.totalPrice} €</span>
+        <span class="summary-value">${totals.totalPrice}</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Descuentos:</span>
-        <span class="summary-value discount">-${totals.totalDiscount} €</span>
+        <span class="summary-value discount">-${totals.totalDiscount}</span>
       </div>
       <div class="summary-total">
         <span class="summary-label">Total Neto:</span>
-        <span class="summary-value">${totals.totalFinal} €</span>
+        <span class="summary-value">${totals.totalFinal}</span>
       </div>
     </div>
     
@@ -568,15 +571,15 @@ export default function CycleReportScreen() {
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Ingresos Brutos:</Text>
-              <Text style={styles.summaryValue}>{totals.totalPrice} €</Text>
+              <Text style={styles.summaryValue}>{totals.totalPrice}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Descuentos:</Text>
-              <Text style={[styles.summaryValue, styles.discount]}>-{totals.totalDiscount} €</Text>
+              <Text style={[styles.summaryValue, styles.discount]}>-{totals.totalDiscount}</Text>
             </View>
             <View style={[styles.summaryRow, styles.summaryRowFinal]}>
               <Text style={styles.summaryLabelFinal}>Total Neto:</Text>
-              <Text style={styles.summaryValueFinal}>{totals.totalFinal} €</Text>
+              <Text style={styles.summaryValueFinal}>{totals.totalFinal}</Text>
             </View>
           </View>
 

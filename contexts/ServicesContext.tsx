@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
+import { textToCents, textPercentToNumber } from '@/utils/money';
 
 export type PaymentMethod = 'Tarjeta' | 'Efectivo' | 'Amex' | 'Abonado';
 
@@ -53,14 +54,14 @@ export const [ServicesProvider, useServices] = createContextHook(() => {
 
   const totals = useMemo(() => {
     return services.reduce((acc, service) => {
-      const price = parseFloat(service.price) || 0;
-      const discountPercent = parseFloat(service.discountPercent) || 0;
-      const discountAmount = (price * discountPercent) / 100;
-      const finalPrice = price - discountAmount;
+      const priceCents = textToCents(service.price) || 0;
+      const discountNum = textPercentToNumber(service.discountPercent) || 0;
+      const discountCents = Math.floor((priceCents * discountNum) / 100);
+      const finalCents = priceCents - discountCents;
       
-      acc.totalPrice += price;
-      acc.totalDiscount += discountAmount;
-      acc.totalFinal += finalPrice;
+      acc.totalPrice += priceCents;
+      acc.totalDiscount += discountCents;
+      acc.totalFinal += finalCents;
       
       return acc;
     }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
