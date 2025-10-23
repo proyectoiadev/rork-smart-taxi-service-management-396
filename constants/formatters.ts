@@ -92,3 +92,60 @@ export function calculateFinalPrice(price: string | number, discountPercent: str
   }
   return truncated;
 }
+
+/**
+ * Formatea una fecha ISO (YYYY-MM-DD) a formato español DD/MM/YYYY
+ */
+export function formatDateToSpanish(dateStr: string): string {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Convierte fecha formato español DD/MM/YYYY a ISO YYYY-MM-DD
+ */
+export function parseSpanishDate(dateStr: string): string {
+  if (!dateStr) return '';
+  if (dateStr.includes('-') && dateStr.split('-')[0].length === 4) {
+    return dateStr;
+  }
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const [day, month, year] = parts;
+    return `${year}-${month}-${day}`;
+  }
+  return dateStr;
+}
+
+/**
+ * Obtiene la fecha actual en formato ISO YYYY-MM-DD
+ */
+export function getTodayISO(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Formatea una fecha completa con nombre de mes en español
+ */
+export function formatDateLongSpanish(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0');
+  const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} de ${month} de ${year}`;
+}
+
+/**
+ * Formatea una fecha con mes corto en español
+ */
+export function formatDateShortSpanish(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0');
+  const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const month = months[date.getMonth()];
+  return `${day} ${month}`;
+}
