@@ -364,23 +364,25 @@ export default function HomeScreen() {
 
   const todayTotal = useMemo(() => {
     const todayServices = services.filter(s => s.date === new Date().toISOString().split('T')[0]);
-    return todayServices.reduce((acc, service) => {
+    const total = todayServices.reduce((acc, service) => {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
       const finalPrice = price - discountAmount;
       return acc + finalPrice;
     }, 0);
+    return formatCurrency(total);
   }, [services]);
 
   const monthTotal = useMemo(() => {
-    return services.reduce((acc, service) => {
+    const total = services.reduce((acc, service) => {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
       const finalPrice = price - discountAmount;
       return acc + finalPrice;
     }, 0);
+    return formatCurrency(total);
   }, [services]);
 
   const getVisibleMonths = () => {
@@ -939,9 +941,9 @@ export default function HomeScreen() {
 
                   <View style={styles.serviceCardFooter}>
                     <View>
-                      <Text style={styles.serviceCardPrice}>Precio: €{formatCurrency(service.price)}</Text>
+                      <Text style={styles.serviceCardPrice}>Precio: €{service.price}</Text>
                       {discountAmount > 0 && (
-                        <Text style={styles.serviceCardDiscount}>-{formatCurrency(service.discountPercent)}%</Text>
+                        <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
                       )}
                     </View>
                     <Text style={styles.serviceCardTotal}>Total: €{finalPrice}</Text>

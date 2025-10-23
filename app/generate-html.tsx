@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import { useServices } from '@/contexts/ServicesContext';
 import { useSettings, BillingCycle } from '@/contexts/SettingsContext';
 import * as FileSystem from 'expo-file-system';
+import { formatCurrency } from '@/constants/formatters';
 
 const LOGO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/vtxu3dykdqnfq7dlmew6n';
 
@@ -15,7 +16,7 @@ const MONTH_NAMES = [
 
 function CycleSummary({ selectedCycle, getServicesByCycle }: { selectedCycle: BillingCycle; getServicesByCycle: (cycleId: string) => any[] }) {
   const cycleServices = getServicesByCycle(selectedCycle.id).filter(s => s.paymentMethod === 'Abonado');
-  const totals = cycleServices.reduce((acc, s) => {
+  const totalsCalc = cycleServices.reduce((acc, s) => {
     const price = parseFloat(s.price) || 0;
     const discountPercent = parseFloat(s.discountPercent) || 0;
     const discountAmount = (price * discountPercent / 100);
@@ -25,6 +26,12 @@ function CycleSummary({ selectedCycle, getServicesByCycle }: { selectedCycle: Bi
     acc.totalFinal += finalPrice;
     return acc;
   }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
+
+  const totals = {
+    totalPrice: formatCurrency(totalsCalc.totalPrice),
+    totalDiscount: formatCurrency(totalsCalc.totalDiscount),
+    totalFinal: formatCurrency(totalsCalc.totalFinal),
+  };
 
   return (
     <View style={styles.summary}>
@@ -90,7 +97,7 @@ export default function GenerateHTMLScreen() {
 
     const abonadoServices = getServicesByCycle(cycle.id).filter(s => s.paymentMethod === 'Abonado');
 
-    const abonadoTotals = abonadoServices.reduce((acc, service) => {
+    const abonadoTotalsCalc = abonadoServices.reduce((acc, service) => {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
@@ -102,6 +109,12 @@ export default function GenerateHTMLScreen() {
       
       return acc;
     }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
+
+    const abonadoTotals = {
+      totalPrice: formatCurrency(abonadoTotalsCalc.totalPrice),
+      totalDiscount: formatCurrency(abonadoTotalsCalc.totalDiscount),
+      totalFinal: formatCurrency(abonadoTotalsCalc.totalFinal),
+    };
 
     const servicesRows = abonadoServices.map((service, index) => {
       const price = parseFloat(service.price) || 0;
@@ -116,7 +129,7 @@ export default function GenerateHTMLScreen() {
           <td style="color: #374151; padding-left: 4px;">${service.company}</td>
           <td style="text-align: right; color: #374151; white-space: nowrap;">${service.price}&nbsp;€</td>
           <td style="text-align: right; color: ${discountPercent > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountPercent > 0 ? `-${service.discountPercent}%` : '-'}</td>
-          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalPrice}&nbsp;€</td>
+          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${formatCurrency(finalPrice)}&nbsp;€</td>
         </tr>
         ${service.observations ? `
         <tr>

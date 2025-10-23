@@ -6,6 +6,7 @@ import { Download, Calendar, Globe } from 'lucide-react-native';
 import { useSettings } from '@/contexts/SettingsContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
+import { formatCurrency } from '@/constants/formatters';
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -262,7 +263,7 @@ async function generateMonthReport(month: number, settings: any) {
       return;
     }
 
-    const totals = services.reduce((acc: any, service: any) => {
+    const totalsCalc = services.reduce((acc: any, service: any) => {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
@@ -274,6 +275,12 @@ async function generateMonthReport(month: number, settings: any) {
       
       return acc;
     }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
+
+    const totals = {
+      totalPrice: formatCurrency(totalsCalc.totalPrice),
+      totalDiscount: formatCurrency(totalsCalc.totalDiscount),
+      totalFinal: formatCurrency(totalsCalc.totalFinal),
+    };
 
     const htmlContent = generateHTMLContent(services, month, CURRENT_YEAR, settings, totals);
     const fileName = `reporte_${MONTH_NAMES[month]}_${CURRENT_YEAR}.html`;
@@ -331,7 +338,7 @@ function generateHTMLContent(services: any[], month: number, year: number, setti
         <td style="color: #374151; padding-left: 4px;">${service.clientName || service.company || '-'}</td>
         <td style="text-align: right; color: #374151; white-space: nowrap;">${service.price}&nbsp;€</td>
         <td style="text-align: right; color: ${discountPercent > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountPercent > 0 ? `-${service.discountPercent}%` : '-'}</td>
-        <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalPrice}&nbsp;€</td>
+        <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${formatCurrency(finalPrice)}&nbsp;€</td>
       </tr>
       ${service.observations ? `
       <tr>

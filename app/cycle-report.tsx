@@ -6,6 +6,7 @@ import { useServices } from '@/contexts/ServicesContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import * as FileSystem from 'expo-file-system';
 import { Share2 } from 'lucide-react-native';
+import { formatCurrency } from '@/constants/formatters';
 
 const LOGO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/vtxu3dykdqnfq7dlmew6n';
 
@@ -17,7 +18,7 @@ export default function CycleReportScreen() {
   const { settings, billingCycles } = useSettings();
   const [isGenerating, setIsGenerating] = useState(false);
   const [cycleServices, setCycleServices] = useState<any[]>([]);
-  const [totals, setTotals] = useState({ totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
+  const [totals, setTotals] = useState({ totalPrice: '0', totalDiscount: '0', totalFinal: '0' });
 
   const cycle = billingCycles.find(c => c.id === cycleId);
 
@@ -27,7 +28,7 @@ export default function CycleReportScreen() {
       const filtered = allServices.filter(s => s.billingCycleId === cycleId);
       setCycleServices(filtered);
 
-      const calculatedTotals = filtered.reduce((acc, service) => {
+      const calculatedTotalsCalc = filtered.reduce((acc, service) => {
         const price = parseFloat(service.price) || 0;
         const discountPercent = parseFloat(service.discountPercent) || 0;
         const discountAmount = (price * discountPercent) / 100;
@@ -39,6 +40,12 @@ export default function CycleReportScreen() {
         
         return acc;
       }, { totalPrice: 0, totalDiscount: 0, totalFinal: 0 });
+
+      const calculatedTotals = {
+        totalPrice: formatCurrency(calculatedTotalsCalc.totalPrice),
+        totalDiscount: formatCurrency(calculatedTotalsCalc.totalDiscount),
+        totalFinal: formatCurrency(calculatedTotalsCalc.totalFinal),
+      };
 
       setTotals(calculatedTotals);
     } catch (error) {
@@ -76,7 +83,7 @@ export default function CycleReportScreen() {
           <td style="color: #374151; padding-left: 4px;">${service.clientName || '-'}</td>
           <td style="text-align: right; color: #374151; white-space: nowrap;">${service.price}&nbsp;€</td>
           <td style="text-align: right; color: ${discountPercent > 0 ? '#ef4444' : '#6b7280'}; white-space: nowrap;">${discountPercent > 0 ? `-${service.discountPercent}%` : '-'}</td>
-          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${finalPrice}&nbsp;€</td>
+          <td style="text-align: right; color: #4caf50; font-weight: 700; white-space: nowrap;">${formatCurrency(finalPrice)}&nbsp;€</td>
         </tr>
         ${service.observations ? `
         <tr>
