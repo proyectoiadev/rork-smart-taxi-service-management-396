@@ -952,9 +952,7 @@ export default function HomeScreen() {
                     <View>
                       <Text style={styles.serviceCardPrice}>Precio: {priceDisplay}</Text>
                       {discountCents > 0 && (
-                        <View>
-                          <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
-                        </View>
+                        <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
                       )}
                     </View>
                     <Text style={styles.serviceCardTotal}>Total: {finalDisplay}</Text>
