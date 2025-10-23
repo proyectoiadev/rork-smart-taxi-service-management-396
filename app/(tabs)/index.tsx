@@ -367,7 +367,8 @@ export default function HomeScreen() {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
-      return acc + (price - discountAmount);
+      const finalPrice = Math.round((price - discountAmount) * 100) / 100;
+      return acc + finalPrice;
     }, 0);
   }, [services]);
 
@@ -376,7 +377,8 @@ export default function HomeScreen() {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
-      return acc + (price - discountAmount);
+      const finalPrice = Math.round((price - discountAmount) * 100) / 100;
+      return acc + finalPrice;
     }, 0);
   }, [services]);
 
@@ -564,14 +566,15 @@ export default function HomeScreen() {
 
       <KeyboardAvoidingView 
         style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView 
           style={styles.mainScrollView}
           contentContainerStyle={styles.mainScrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={true}
+          scrollEnabled={true}
         >
           <View style={styles.addServiceCard}>
             <TouchableOpacity 
@@ -785,6 +788,14 @@ export default function HomeScreen() {
                         multiline
                         numberOfLines={3}
                         textAlignVertical="top"
+                        onFocus={() => {
+                          setTimeout(() => {
+                            Keyboard.scheduleLayoutAnimation({
+                              duration: 250,
+                              easing: 'keyboard',
+                            } as any);
+                          }, 100);
+                        }}
                       />
                       <View style={styles.voiceButtonContainerTop}>
                         <VoiceButton onResult={setObservations} />
@@ -898,7 +909,7 @@ export default function HomeScreen() {
               const price = parseFloat(service.price) || 0;
               const discountPercent = parseFloat(service.discountPercent) || 0;
               const discountAmount = (price * discountPercent) / 100;
-              const finalPrice = price - discountAmount;
+              const finalPrice = Math.round((price - discountAmount) * 100) / 100;
 
               return (
                 <View key={service.id} style={styles.serviceCard}>
@@ -1269,7 +1280,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainScrollContent: {
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === 'ios' ? 400 : 300,
   },
   addServiceCard: {
     backgroundColor: '#FFFFFF',
