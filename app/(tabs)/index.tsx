@@ -21,8 +21,7 @@ import { useServices, Service, PaymentMethod } from '@/contexts/ServicesContext'
 import { useRecurringClients } from '@/contexts/RecurringClientsContext';
 import { useRecurringServices } from '@/contexts/RecurringServicesContext';
 import VoiceInput, { VoiceButton } from '@/components/VoiceInput';
-import { formatCurrency, calculateDiscount, calculateFinalPrice } from '@/constants/formatters';
-import { textToCents, centsToCurrency, centsToDotString, textPercentToNumber } from '@/utils/money';
+import { centsToCurrency, textToCents, centsToDotString, discountCentsHalfUp, percentTextToBps } from '@/utils/money';
 import TicketScanner from '@/components/TicketScanner';
 
 const MONTH_NAMES = [
@@ -144,12 +143,12 @@ export default function HomeScreen() {
     }
 
     const priceCents = textToCents(price);
-    const discountNum = textPercentToNumber(discountPercent ?? '0') ?? 0;
+    const bps = percentTextToBps(discountPercent ?? '0');
     if (priceCents == null || priceCents <= 0) {
       Alert.alert('Error', 'Precio inválido. Usa formato 12,34 o 12.34');
       return;
     }
-    if (discountNum < 0 || discountNum > 100) {
+    if (bps == null || bps < 0 || bps > 10000) {
       Alert.alert('Error', 'Descuento inválido (0-100)');
       return;
     }
@@ -207,7 +206,7 @@ export default function HomeScreen() {
         destination: paymentMethod === 'Abonado' ? destination : '',
         company: paymentMethod === 'Abonado' ? clientName : '',
         price: normalizedPriceText,
-        discountPercent: paymentMethod === 'Abonado' ? String(discountNum) : '0',
+        discountPercent: paymentMethod === 'Abonado' ? String(bps / 100) : '0',
         observations: paymentMethod === 'Abonado' ? observations : '',
         paymentMethod,
         clientName: paymentMethod === 'Abonado' ? clientName : undefined,
@@ -306,10 +305,16 @@ export default function HomeScreen() {
       }
     }
 
-    const parsedPrice = parseFloat(editPrice);
-    if (!editPrice || editPrice === '' || editPrice === '0' || isNaN(parsedPrice) || parsedPrice <= 0) {
-      console.log('Price validation failed:', editPrice, parsedPrice);
+    const editCents = textToCents(editPrice);
+    if (editCents == null || editCents <= 0) {
+      console.log('Price validation failed:', editPrice, editCents);
       Alert.alert('Error', 'Por favor, introduce un precio válido');
+      return;
+    }
+    
+    const editBps = percentTextToBps(editDiscountPercent ?? '0');
+    if (editPaymentMethod === 'Abonado' && (editBps == null || editBps < 0 || editBps > 10000)) {
+      Alert.alert('Error', 'Descuento inválido (0-100)');
       return;
     }
 
@@ -329,8 +334,8 @@ export default function HomeScreen() {
         origin: editPaymentMethod === 'Abonado' ? editOrigin : '',
         destination: editPaymentMethod === 'Abonado' ? editDestination : '',
         company: editPaymentMethod === 'Abonado' ? editCompany : '',
-        price: editPrice,
-        discountPercent: editPaymentMethod === 'Abonado' ? editDiscountPercent : '0',
+        price: centsToDotString(editCents),
+        discountPercent: editPaymentMethod === 'Abonado' ? String((editBps ?? 0) / 100) : '0',
         observations: editPaymentMethod === 'Abonado' ? editObservations : '',
         paymentMethod: editPaymentMethod,
         clientName: editPaymentMethod === 'Abonado' ? editClientName || undefined : undefined,
@@ -382,8 +387,7 @@ export default function HomeScreen() {
       .filter(s => s.date === today)
       .reduce((acc, s) => {
         const p = textToCents(String(s.price ?? '')) ?? 0;
-        const d = textPercentToNumber(String(s.discountPercent ?? '0')) ?? 0;
-        const disc = Math.round(p * d / 100);
+        const disc = discountCentsHalfUp(p, String(s.discountPercent ?? '0'));
         return acc + (p - disc);
       }, 0);
     return centsToCurrency(cents);
@@ -392,8 +396,7 @@ export default function HomeScreen() {
   const monthTotal = useMemo(() => {
     const cents = services.reduce((acc, s) => {
       const p = textToCents(String(s.price ?? '')) ?? 0;
-      const d = textPercentToNumber(String(s.discountPercent ?? '0')) ?? 0;
-      const disc = Math.round(p * d / 100);
+      const disc = discountCentsHalfUp(p, String(s.discountPercent ?? '0'));
       return acc + (p - disc);
     }, 0);
     return centsToCurrency(cents);
@@ -920,12 +923,11 @@ export default function HomeScreen() {
             </View>
           ) : (
             filteredServices.map((service) => {
-              const priceCents = textToCents(service.price) || 0;
-              const discountNum = textPercentToNumber(service.discountPercent) || 0;
-              const discountCents = Math.floor((priceCents * discountNum) / 100);
-              const finalCents = priceCents - discountCents;
-              const priceDisplay = centsToCurrency(priceCents);
-              const finalDisplay = centsToCurrency(finalCents);
+              const priceC = textToCents(String(service.price ?? '')) ?? 0;
+              const discC = discountCentsHalfUp(priceC, String(service.discountPercent ?? '0'));
+              const finalC = priceC - discC;
+              const priceDisplay = centsToCurrency(priceC);
+              const finalDisplay = centsToCurrency(finalC);
 
               return (
                 <View key={service.id} style={styles.serviceCard}>
@@ -963,8 +965,8 @@ export default function HomeScreen() {
                   <View style={styles.serviceCardFooter}>
                     <View>
                       <Text style={styles.serviceCardPrice}>Precio: {priceDisplay}</Text>
-                      {discountCents > 0 && (
-                        <Text style={styles.serviceCardDiscount}>-{service.discountPercent}%</Text>
+                      {discC > 0 && (
+                        <Text style={styles.serviceCardDiscount}>-{String(service.discountPercent ?? '0').replace('.', ',')}%</Text>
                       )}
                     </View>
                     <Text style={styles.serviceCardTotal}>Total: {finalDisplay}</Text>
