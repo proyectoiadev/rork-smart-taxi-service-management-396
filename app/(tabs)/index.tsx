@@ -581,20 +581,18 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.keyboardAvoid}>
-          <KeyboardAvoidingView 
-            style={styles.flex}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-          >
-            <ScrollView 
-              style={styles.mainScrollView}
-              contentContainerStyle={styles.mainScrollContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={true}
-              scrollEnabled={true}
-            >
+      <KeyboardAvoidingView 
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <ScrollView 
+          style={styles.mainScrollView}
+          contentContainerStyle={styles.mainScrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={true}
+          scrollEnabled={true}
+        >
           <View style={styles.addServiceCard}>
             <TouchableOpacity 
               style={styles.addServiceHeader}
@@ -973,10 +971,8 @@ export default function HomeScreen() {
               );
             })
           )}
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </View>
-      </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <Modal
         visible={showEditModal}
@@ -1304,7 +1300,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainScrollContent: {
-    paddingBottom: Platform.OS === 'ios' ? 500 : 400,
+    paddingBottom: 100,
   },
   addServiceCard: {
     backgroundColor: '#FFFFFF',
