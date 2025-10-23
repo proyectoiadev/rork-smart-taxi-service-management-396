@@ -530,7 +530,7 @@ export default function HomeScreen() {
           ))}
         </View>
         <View style={styles.calendarGrid}>
-          {days}
+          {days.map((day) => day)}
         </View>
       </View>
     );
