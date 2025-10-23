@@ -6,7 +6,7 @@ import { useServices } from '@/contexts/ServicesContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import * as FileSystem from 'expo-file-system';
 import { Share2 } from 'lucide-react-native';
-import { formatCurrency } from '@/constants/formatters';
+
 import { textToCents, centsToCurrency, textPercentToNumber } from '@/utils/money';
 
 const LOGO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/vtxu3dykdqnfq7dlmew6n';
@@ -575,7 +575,7 @@ export default function CycleReportScreen() {
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Descuentos:</Text>
-              <Text style={[styles.summaryValue, styles.discount]}>-{totals.totalDiscount}</Text>
+              <Text style={[styles.summaryValue, styles.discount]}>{`-${totals.totalDiscount}`}</Text>
             </View>
             <View style={[styles.summaryRow, styles.summaryRowFinal]}>
               <Text style={styles.summaryLabelFinal}>Total Neto:</Text>
