@@ -56,7 +56,7 @@ export const [ServicesProvider, useServices] = createContextHook(() => {
       const price = parseFloat(service.price) || 0;
       const discountPercent = parseFloat(service.discountPercent) || 0;
       const discountAmount = (price * discountPercent) / 100;
-      const finalPrice = Math.round((price - discountAmount) * 100) / 100;
+      const finalPrice = price - discountAmount;
       
       acc.totalPrice += price;
       acc.totalDiscount += discountAmount;
