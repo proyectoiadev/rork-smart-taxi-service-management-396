@@ -5,55 +5,42 @@ export const EUR = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 2,
 });
 
-export function textToCents(input: string | null | undefined): number | null {
-  if (input == null || input === undefined) return null;
-  const t = String(input).trim();
-  if (!t || t === 'null' || t === 'undefined') return null;
-
-  const cleaned = t.replace(/\s|\u00A0/g, '').replace(/\.(?=\d{3}(\D|$))/g, '');
+/** "12,3" | "12.30" | " 1.234,56 " -> 1234 (céntimos). null si no parseable */
+export function textToCents(input: string): number | null {
+  if (input == null) return null;
+  const trimmed = String(input).trim();
+  if (!trimmed) return null;
+  
+  const cleaned = trimmed.replace(/\s|(\u00A0)/g, '').replace(/\.(?=\d{3}(\D|$))/g, '');
+  
   const unified = cleaned.replace(',', '.');
   if (!/^-?\d*\.?\d*$/.test(unified)) return null;
-
-  const neg = unified[0] === '-' ? -1 : 1;
-  const [ip = '0', dpRaw = ''] = (neg === -1 ? unified.slice(1) : unified).split('.');
-  const dp = (dpRaw + '00').slice(0, 2);
-
-  const euros = ip === '' ? 0 : ip.split('').reduce((n, ch) => n * 10 + (ch.charCodeAt(0) - 48), 0);
-  const cents = dp.split('').reduce((n, ch) => n * 10 + (ch.charCodeAt(0) - 48), 0);
-  return neg * (euros * 100 + cents);
+  const [ip = '0', dp = ''] = unified.split('.');
+  const dec2 = (dp + '00').slice(0, 2);
+  const sign = unified.startsWith('-') ? -1 : 1;
+  const intPart = Math.abs(parseInt(ip || '0', 10));
+  const decPart = Math.abs(parseInt(dec2 || '0', 10));
+  return sign * (intPart * 100 + decPart);
 }
 
+/** 1234 -> "12,34 €" */
 export function centsToCurrency(cents: number): string {
   return EUR.format((cents || 0) / 100);
 }
 
+/** 1234 -> "12.34" (punto) para guardar en texto compatible con parseFloat */
 export function centsToDotString(cents: number): string {
-  const neg = cents < 0 ? '-' : '';
-  const abs = cents < 0 ? -cents : cents;
-  const euros = (abs / 100) | 0;
-  const dec = String(abs - euros * 100).padStart(2, '0');
-  return `${neg}${euros}.${dec}`;
+  const abs = Math.abs(cents);
+  const sign = cents < 0 ? '-' : '';
+  const euros = Math.floor(abs / 100);
+  const dec = String(abs % 100).padStart(2, '0');
+  return `${sign}${euros}.${dec}`;
 }
 
-export function percentTextToBps(input: string | null | undefined): number | null {
-  if (input == null || input === undefined) return null;
-  const u = String(input).trim().replace(',', '.');
-  if (!/^-?\d*\.?\d*$/.test(u) || u === '' || u === '.' || u === '-.' || u === '-' || u === 'null' || u === 'undefined') return null;
-
-  const neg = u[0] === '-' ? -1 : 1;
-  const [ip = '0', dpRaw = ''] = (neg === -1 ? u.slice(1) : u).split('.');
-  const dp = (dpRaw + '00').slice(0, 2);
-
-  const intPart = ip.split('').reduce((n, ch) => n * 10 + (ch.charCodeAt(0) - 48), 0);
-  const decPart = dp.split('').reduce((n, ch) => n * 10 + (ch.charCodeAt(0) - 48), 0);
-  return neg * (intPart * 100 + decPart);
-}
-
-export function discountCentsHalfUp(cents: number, percentText: string | null | undefined): number {
-  if (cents == null || isNaN(cents)) return 0;
-  const bps = percentTextToBps(percentText) ?? 0;
-  const numer = BigInt(Math.floor(cents)) * BigInt(bps);
-  const adj = numer >= 0n ? 5000n : -5000n;
-  const q = (numer + adj) / 10000n;
-  return Number(q);
+/** "%": acepta "10", "10,5", "10.5" -> número JS */
+export function textPercentToNumber(input: string): number | null {
+  if (input == null) return null;
+  const t = String(input).trim().replace(',', '.');
+  if (!/^-?\d*\.?\d*$/.test(t) || t === '' || t === '.' || t === '-.') return null;
+  return Number(t);
 }
